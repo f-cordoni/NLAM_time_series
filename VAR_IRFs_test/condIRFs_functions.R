@@ -1,17 +1,19 @@
 Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
-                     Omega, E, PI_hat, phi, Pa , flag_resit = 1, q_alfa = 0.68){
-  if (flag_resit == 1){
+                     Omega, E, PI_hat, phi, Pa , flag_resit = 1,
+                     q_alfa = 0.68, S = diag(ncol(E) ) ){
+   
     
     #phase 1
     I_delta_nn = array(0,dim = c(H+1,ncol(E),Nsim))
     for (nn in 1:Nsim){
       Y_nn  = matrix(0,t_star+H, ncol(E))
+      Y_nn [1:(t_star-1),] = Omega# [1:(t_star-1),]
       Y_delta_nn = Y_nn
-      #line 5 is not clear
+      #
       
       E_tilde = matrix(0,H+1,ncol(E))
       for (i_col in 1:ncol(E)){
-      ix_sample = sample(1:nrow(E),H+1)
+      ix_sample = sample(1:nrow(E),H+1, replace = TRUE)
       # non per row?
       E_tilde[,i_col] = E[ix_sample,i_col]
        
@@ -23,44 +25,89 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
       U_delta = U
       I_delta = U
     
-      K =ncol(E)
-      for (hh in 1:(H)){
-        for (kk in 1:K){
+      K = ncol(E)
+      for (hh in 1:(H+1)){
+        for (k in 1:K){
           #parents of node k
-          i_parents = which(Pa[,ii]==1)
+          i_parents = which(Pa[,k]==1)
           if ( length( i_parents )==0 ) {
             
-             U_delta[hh+1,k] = E_delta_tilde[hh+1,k] 
+             U_delta[hh,k] = E_delta_tilde[hh,k] 
              
-             U[hh+1,k]  = E_delta_tilde[hh+1,k] 
+             U[hh,k]  = E_tilde[hh,k] 
 
           }else{
             
-            aux_pa = U_delta[hh+1,i_parents]
+            aux_pa = U_delta[hh,i_parents]
             
+            if (flag_resit == 1){
             options=gpOptions("ftc")
             options$kern$comp=list("rbf","white")
             
-            model_phi <- phi[[ii]] 
+            model_phi <- phi[[k]] 
             
-            phi_hat<-gpOut(model_phi,as.matrix(aux_pa))
+            if (length(i_parents)>1){
+              phi_hat<-gpOut(model_phi, t(as.matrix(aux_pa))  )
+            }else{
+              phi_hat<-gpOut(model_phi, as.matrix(aux_pa) )
+            }
+            }
             
-            U_delta[hh+1,k]  = phi_hat + E_delta_tilde[hh+1,k] 
+            if (flag_resit == 2){
+              #Choleski
+              phi_hat  = S[k,] %*% U_delta[hh,]
+            }
+            
+            if (flag_resit == 3){
+              # true CIRFS
+              if (k ==2){
+                phi_hat = phi[[1]](aux_pa)
+              }
+              if (k ==3){
+                phi_hat = phi[[2]](aux_pa[1])+ phi[[3]](aux_pa[2])
+              }
+            }
+            
+            U_delta[hh,k]  = phi_hat + E_delta_tilde[hh,k] 
 
             
-            aux_pa = U [hh+1,i_parents]
-            phi_hat <- gpOut(model_phi,as.matrix(aux_pa))
-            U [hh+1,k] = phi_hat + E_delta_tilde[hh+1,k] 
+            aux_pa = U [hh,i_parents]
+            
+            if (flag_resit == 1){
+            if (length(i_parents)>1){
+              phi_hat<-gpOut(model_phi, t(as.matrix(aux_pa))  )
+            }else{
+              phi_hat<-gpOut(model_phi, as.matrix(aux_pa) )
+            }
+            }
+            
+            if (flag_resit == 2){
+              
+              #Choleski
+              phi_hat  = S[k,] %*% U[hh,]
+            }
+            
+            if (flag_resit == 3){
+              # true CIRFS
+              if (k ==2){
+                phi_hat = phi[[1]](aux_pa)
+              }
+              if (k ==3){
+                phi_hat = phi[[2]](aux_pa[1])+ phi[[3]](aux_pa[2])
+              }
+            }
+            # phi_hat <- gpOut(model_phi,as.matrix(aux_pa))
+            U [hh,k] = phi_hat + E_tilde[hh,k] 
 
           }
           # generate time series 
             #CONTROLLARE QUI il ciclo almeno su kk deve terminare
         }
            #difference
-          Y_delta_nn[hh+1, ] = PI_hat %*% Y_delta_nn[hh ,] + U_delta[hh+1, ] 
+          Y_delta_nn[t_star+hh-1, ] = PI_hat %*% Y_delta_nn[t_star+hh-2 ,] + U_delta[hh, ] 
           
-          Y_nn[hh+1, ] = PI_hat %*% Y_nn[hh ,] + U[hh+1, ] 
-          I_delta [hh+1, ]  = Y_delta_nn[hh+1, ] - Y_nn[hh+1, ] 
+          Y_nn[t_star+hh-1, ] = PI_hat %*% Y_nn[t_star+hh-2 ,] + U[hh, ] 
+          I_delta [hh , ]  = Y_delta_nn[t_star+hh -1, ] - Y_nn[t_star+hh -1, ] 
       }
       I_delta_nn [,,nn] = I_delta
     }
@@ -80,15 +127,15 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
         I_delta_nn_up [,ii] = apply(aux,2,quantile,probs = q_alfa)
         I_delta_nn_lwr[,ii] = apply(aux,2,quantile,probs = 1-q_alfa)
     }
-  }else{
+   
     # fare per SR
     # fare con true specification
-  }
+   
   
-  return( list(  ) )
+  return( list(AVG = I_delta_nn_avg, LWR = I_delta_nn_lwr, UPR = I_delta_nn_up  ) )
 }
 
-get_structural_shocks_RESIT <- function(residuals){
+get_structural_shocks_RESIT <- function(residual){
   auxY = residual
   N = ncol(auxY)
   aux_graph = matrix(0,N,N)

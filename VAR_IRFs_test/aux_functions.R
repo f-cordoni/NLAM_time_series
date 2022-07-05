@@ -27,7 +27,7 @@ generate_time_series <- function(N = 3,    T = 250 , sigma = 0.1,
     T=T-1
     # plot(as.ts(Y) ) 
   
-  return(Y)
+  return(list(Y = Y, u = u[-1,] , S_shocks = eps[-1,]) )
 }
 
 VAR_estimation <- function(Y){
@@ -55,123 +55,122 @@ VAR_estimation <- function(Y){
     
     auxY=residual
 
-    return(list(residuals = auxY, hat_PI_1 = hat_PI_1))    
+    return(list(residuals = auxY, hat_PI_1 = hat_PI_1 ))    
 }
-
-get_IRFS <-function( auxY ,   f12, f13, f23, size_shock = 0.5,
-                     PI_1, hat_PI_1, T_horizon = 20,
-                     ){
-  
-  #conditional IRFS
-  residual = auxY
-  N = ncol(auxY)
-  aux_graph = matrix(0,N,N)
-  
-    graph_resit <- ICML(as.matrix(auxY), alpha = 0.05, model = "GP", parsModel = list(), 
-                        indtest = dhsic.test, 
-                        parsIndtest = list(method = "ExactFastTrace"), confounder_check = 0, output = FALSE)
-    aux_graph=aux_graph+graph_resit
-     
-    #true irfs
-    
-    
-    irf_true = array(0,dim= c(20,N,N))
-    
-    
-    irf_true[1,,1] =c(size_shock,f12(size_shock),f13(size_shock)+f23(f12(size_shock)) )
-    irf_true[1,,2] =c(0,size_shock,f23(size_shock))
-    irf_true[1,,3] =c(0,0,size_shock)
-    
-    for (tt in 2:T_horizon){
-      irf_true[tt,,1] =  PI_1 %*% irf_true[tt-1,,1]
-      irf_true[tt,,2] =  PI_1 %*% irf_true[tt-1,,2]
-      irf_true[tt,,3] =  PI_1 %*% irf_true[tt-1,,3]
-    }
-    # for (ii in 1:3){
-    #   plot.ts(irf_true[,,ii])
-    # }
-    
-    #irfs linear
-    Sigma = cov(auxY)
-    
-    S = t(chol(Sigma))
-    irf_sr = irf_true*0
-    
-    irf_sr[1,,1] =t(S %*% c(0.5,0,0)/S[1,1])
-    irf_sr[1,,2] =t(S %*% c(0,0.5,0)/S[2,2])
-    irf_sr[1,,3] =t(S %*% c(0,0,0.5)/S[3,3])
-    
-    for (tt in 2:T_horizon){
-      irf_sr[tt,,1] =  hat_PI_1 %*% irf_sr[tt-1,,1]
-      irf_sr[tt,,2] =  hat_PI_1 %*% irf_sr[tt-1,,2]
-      irf_sr[tt,,3] =  hat_PI_1 %*% irf_sr[tt-1,,3]
-    }
-    # for (ii in 1:3){
-    #   plot.ts(irf_sr[,,ii])
-    # }
-    
-    
-    #irfs nonlinear
-    
-
-    
-    # we known that RESIT will be provide the order 
-    # 1->2; 1->3; 2->3
-    shocks = residual
-    shocks[,1] = residual[,1]
-    aux_pa = shocks[,1]
-    
-    options=gpOptions("ftc")
-    options$kern$comp=list("rbf","white")
-    #options$learnScales=TRUE
-    model_12<-gpCreate(1,1,as.matrix(aux_pa),
-                       as.matrix(residual[,2]),options)
-    yhat<-gpOut(model_12,as.matrix(aux_pa))
-    shocks[,2]<-as.matrix(residual[,2])-yhat
-    
-    aux_pa = shocks[,1:2] # chiedere qui, secondo me è gisuta perché shocks sono indipendenti altrimenti ho problemi di cofounder
-    model_3<-gpCreate(2,1,as.matrix(aux_pa),
-                      as.matrix(residual[,3]),options)
-    yhat<-gpOut(model_3,as.matrix(aux_pa))
-    shocks[,3]<-as.matrix(residual[,3])-yhat
-    
-    
-    
-    # cond_distr_ss_y <- ecdf(ss_y)
-    # 
-    # y_shocked = y2[1]+cond_distr_ss_y(runif(100,0,1))
-    
-    # impact of unitary shock (1) of x on y
-    y12<-gpOut(model_12,0.5+0*as.matrix(shocks[,1]))
-    # y12<-gpOut(model_12,seq(from=-1,to=1,by=1/124)+0*as.matrix(aux_pa))
-    # plot(y12)
-    
-    aux = matrix(0,T-1,2); aux[,1]=0; aux[,2]=y12[1]
-    y23<-gpOut(model_3,aux)
-    aux = matrix(0,T-1,2); aux[,1]=0.5; aux[,2]=0
-    y13<-gpOut(model_3,aux)
-    
-    irf_RESIT[1,,1] =c(0.5,y12[1],y13[1]+y23[1])
-    aux = matrix(0,T-1,2); aux[,1]=0; aux[,2]=0.5
-    y23<-gpOut(model_3,aux)
-    irf_RESIT[1,,2] =c(0,0.5,y23[1])
-    irf_RESIT[1,,3] =c(0,0,0.5)
-    
-    for (tt in 2:T_horizon){
-      irf_RESIT[tt,,1] =  hat_PI_1 %*% irf_RESIT[tt-1,,1]
-      irf_RESIT[tt,,2] =  hat_PI_1 %*% irf_RESIT[tt-1,,2]
-      irf_RESIT[tt,,3] =  hat_PI_1 %*% irf_RESIT[tt-1,,3]
-    }
-    #   for (ii in 1:3){
-    # #    plot.ts(irf_RESIT[,,ii])
-    #   }
-    
-    return(list(irf_true = irf_true,
-                irf_sr = irf_sr,
-                irf_RESIT = irf_RESIT))
-    
-    
-}
+# 
+# get_IRFS <-function( auxY ,   f12, f13, f23, size_shock = 0.5,
+#                      PI_1, hat_PI_1, T_horizon = 20,                     ){
+#   
+#   #conditional IRFS
+#   residual = auxY
+#   N = ncol(auxY)
+#   aux_graph = matrix(0,N,N)
+#   
+#     graph_resit <- ICML(as.matrix(auxY), alpha = 0.05, model = "GP", parsModel = list(), 
+#                         indtest = dhsic.test, 
+#                         parsIndtest = list(method = "ExactFastTrace"), confounder_check = 0, output = FALSE)
+#     aux_graph=aux_graph+graph_resit
+#      
+#     #true irfs
+#     
+#     
+#     irf_true = array(0,dim= c(20,N,N))
+#     
+#     
+#     irf_true[1,,1] =c(size_shock,f12(size_shock),f13(size_shock)+f23(f12(size_shock)) )
+#     irf_true[1,,2] =c(0,size_shock,f23(size_shock))
+#     irf_true[1,,3] =c(0,0,size_shock)
+#     
+#     for (tt in 2:T_horizon){
+#       irf_true[tt,,1] =  PI_1 %*% irf_true[tt-1,,1]
+#       irf_true[tt,,2] =  PI_1 %*% irf_true[tt-1,,2]
+#       irf_true[tt,,3] =  PI_1 %*% irf_true[tt-1,,3]
+#     }
+#     # for (ii in 1:3){
+#     #   plot.ts(irf_true[,,ii])
+#     # }
+#     
+#     #irfs linear
+#     Sigma = cov(auxY)
+#     
+#     S = t(chol(Sigma))
+#     irf_sr = irf_true*0
+#     
+#     irf_sr[1,,1] =t(S %*% c(0.5,0,0)/S[1,1])
+#     irf_sr[1,,2] =t(S %*% c(0,0.5,0)/S[2,2])
+#     irf_sr[1,,3] =t(S %*% c(0,0,0.5)/S[3,3])
+#     
+#     for (tt in 2:T_horizon){
+#       irf_sr[tt,,1] =  hat_PI_1 %*% irf_sr[tt-1,,1]
+#       irf_sr[tt,,2] =  hat_PI_1 %*% irf_sr[tt-1,,2]
+#       irf_sr[tt,,3] =  hat_PI_1 %*% irf_sr[tt-1,,3]
+#     }
+#     # for (ii in 1:3){
+#     #   plot.ts(irf_sr[,,ii])
+#     # }
+#     
+#     
+#     #irfs nonlinear
+#     
+# 
+#     
+#     # we known that RESIT will be provide the order 
+#     # 1->2; 1->3; 2->3
+#     shocks = residual
+#     shocks[,1] = residual[,1]
+#     aux_pa = shocks[,1]
+#     
+#     options=gpOptions("ftc")
+#     options$kern$comp=list("rbf","white")
+#     #options$learnScales=TRUE
+#     model_12<-gpCreate(1,1,as.matrix(aux_pa),
+#                        as.matrix(residual[,2]),options)
+#     yhat<-gpOut(model_12,as.matrix(aux_pa))
+#     shocks[,2]<-as.matrix(residual[,2])-yhat
+#     
+#     aux_pa = shocks[,1:2] # chiedere qui, secondo me è gisuta perché shocks sono indipendenti altrimenti ho problemi di cofounder
+#     model_3<-gpCreate(2,1,as.matrix(aux_pa),
+#                       as.matrix(residual[,3]),options)
+#     yhat<-gpOut(model_3,as.matrix(aux_pa))
+#     shocks[,3]<-as.matrix(residual[,3])-yhat
+#     
+#     
+#     
+#     # cond_distr_ss_y <- ecdf(ss_y)
+#     # 
+#     # y_shocked = y2[1]+cond_distr_ss_y(runif(100,0,1))
+#     
+#     # impact of unitary shock (1) of x on y
+#     y12<-gpOut(model_12,0.5+0*as.matrix(shocks[,1]))
+#     # y12<-gpOut(model_12,seq(from=-1,to=1,by=1/124)+0*as.matrix(aux_pa))
+#     # plot(y12)
+#     
+#     aux = matrix(0,T-1,2); aux[,1]=0; aux[,2]=y12[1]
+#     y23<-gpOut(model_3,aux)
+#     aux = matrix(0,T-1,2); aux[,1]=0.5; aux[,2]=0
+#     y13<-gpOut(model_3,aux)
+#     
+#     irf_RESIT[1,,1] =c(0.5,y12[1],y13[1]+y23[1])
+#     aux = matrix(0,T-1,2); aux[,1]=0; aux[,2]=0.5
+#     y23<-gpOut(model_3,aux)
+#     irf_RESIT[1,,2] =c(0,0.5,y23[1])
+#     irf_RESIT[1,,3] =c(0,0,0.5)
+#     
+#     for (tt in 2:T_horizon){
+#       irf_RESIT[tt,,1] =  hat_PI_1 %*% irf_RESIT[tt-1,,1]
+#       irf_RESIT[tt,,2] =  hat_PI_1 %*% irf_RESIT[tt-1,,2]
+#       irf_RESIT[tt,,3] =  hat_PI_1 %*% irf_RESIT[tt-1,,3]
+#     }
+#     #   for (ii in 1:3){
+#     # #    plot.ts(irf_RESIT[,,ii])
+#     #   }
+#     
+#     return(list(irf_true = irf_true,
+#                 irf_sr = irf_sr,
+#                 irf_RESIT = irf_RESIT))
+#     
+#     
+# }
 
 
  

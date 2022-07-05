@@ -14,9 +14,8 @@ source("RESIT.R")
 
 
 # generate VAR- TS with nonlinear contemporaneous effects
-N=3
-Nsim=500
-T=250  
+
+
 set.seed(2021)
 
 par_sim=list()
@@ -26,20 +25,20 @@ f12=function (x) x^2#1->2;
 f13=function (x) x^4# 1 ->3
 f23=function (x) sin(x^2)
  
-a = c (0.1,0.5,0.9)
 
-T_horizon = 20
+
 source("aux_functions.R")
 source("RESIT.R")
 
 count=matrix(0,nrow = 3,ncol=3)
-irf_true_boot  = array(0,dim= c(T_horizon,N,N,Nsim) )
+irf_true_boot  = array(0,dim= c(T_horizon-t_star+1,N,N,Nsim) )
 irf_RESIT_boot = irf_true_boot
 irf_sr_boot = irf_true_boot
 
 
 
- for (aa in a){
+
+
    for (nn in 1:Nsim){
 PI_1=aa*matrix(c(1,0,0,
               1,1,0,
@@ -52,55 +51,106 @@ PI_1=aa*matrix(c(1,0,0,
 
  
 #generate time series
-Y = generate_time_series (N = 3,  T = T , sigma = 0.1,
+Y_out = generate_time_series (N = 3,  T = T , sigma = 0.1,
                                  PI_1  = PI_1, f12 = f12, f13  = f13, f23 = f23)
 #estimate the VAR
+Y = Y_out$Y
 out_var = VAR_estimation(Y = Y)
 #compute IRFs
 
-out_shocks_resit = get_structural_shocks_RESIT(auxY)
+source("condIRFs_functions.R")
+source("RESIT.R")
+out_shocks_resit = get_structural_shocks_RESIT(out_var$residuals)
 
 E_resit = out_shocks_resit$Structural_shocks
 phi_resit = out_shocks_resit$phi 
 parents_resit = out_shocks_resit$parents
 
-C_IRFS_resit = Cond_IRFS (t_star = 1 , H = T_horizon , k_star = 1, delta = 0.5 , Nsim = 100,
-                          Omega, E = E_resit, PI_hat = out_var$hat_PI_1,
-                          phi = phi_resit, Pa = parents_resit , flag_resit = 1)
 
-irf_RESIT = array(0,dim= c(T_horizon,N,N))
 
-# f42=function (x) cos(x+x^2)
-out_irfs = get_IRFS ( auxY = out_var$residuals ,   f12 = f12, f13 = f13, f23 = f23, 
-                     size_shock = 0.5,
-                     PI_1 = PI_1, hat_PI_1 = out_var$hat_PI_1, T_horizon = T_horizon)
+phi = list()
+phi[[1]] = f12; phi[[2]] = f23; phi[[3]] = f13
+
+true_parents = matrix(c(0,0,0,
+                        1,0,0,
+                        1,1,0),N,N)
+
+True_IRFs = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = 1, 
+                          delta = 0.5 , Nsim = 100,
+                          Omega = Y[1:(t_star-1),], E = Y_out$S_shocks,
+                          PI_hat = PI_1,
+                          phi = phi, Pa = true_parents , 
+                          flag_resit = 3, q_alfa = 0.68)
+
+
+C_IRFS_resit = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = 1, 
+                          delta = 0.5 , Nsim = 100,
+                          Omega = Y[1:(t_star-1),], E = E_resit,
+                          PI_hat = out_var$hat_PI_1,
+                          phi = phi_resit, Pa = parents_resit , 
+                          flag_resit = 1, q_alfa = 0.68)
+
+S = t(chol(cov(out_var$residuals)))
+parents_SR = t(S!=0)*1-diag(N)
+S_shocks_chol = t( solve(S) %*% t(out_var$residuals))
+
+Chol_IRFs = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = 1, 
+                       delta = 0.5 , Nsim = 100,
+                       Omega = Y[1:(t_star-1),], E = S_shocks_chol,
+                       PI_hat = out_var$hat_PI_1,
+                       phi = phi, Pa = parents_SR , 
+                       flag_resit = 2, q_alfa = 0.68, S = S)
+
+# plot.ts(C_IRFS_resit$AVG[t_star:H,2],type="l")
+#   lines(C_IRFS_resit$LWR[2:H,2], col="2")
+#       lines(C_IRFS_resit$UPR[2:H,2], col = "2")
+#       
+#       plot.ts(True_IRFs$AVG[t_star:H,2],type="l")
+#       lines(True_IRFs$LWR[2:H,2], col="2")
+#       lines(True_IRFs$UPR[2:H,2], col = "2")
+#       
+#       plot.ts(Chol_IRFs$AVG[t_star:H,2],type="l")
+#       lines(Chol_IRFs$LWR[2:H,2], col="2")
+#       lines(Chol_IRFs$UPR[2:H,2], col = "2")
+#       
+#       plot.ts(True_IRFs$AVG[t_star:H,3],type="l")
+#       lines(C_IRFS_resit$AVG[2:H,3], col="2")
+#       lines(Chol_IRFs$AVG[2:H,3], col = "3")
+#       
+#       plot.ts(True_IRFs$AVG[t_star:H,2],type="l")
+#       lines(C_IRFS_resit$AVG[2:H,2], col="2")
+#       lines(Chol_IRFs$AVG[2:H,2], col = "3")
+      
  
-irf_true_boot[,,,nn] = out_irfs$irf_true
-irf_RESIT_boot[,,,nn] = out_irfs$irf_RESIT
-irf_sr_boot[,,,nn] = out_irfs$irf_sr
+ 
+irf_true_boot[,,k_star,nn] = True_IRFs$AVG[t_star:H,]
+irf_RESIT_boot[,,k_star,nn] = C_IRFS_resit$AVG[t_star:H,]
+irf_sr_boot[,,k_star,nn] = Chol_IRFs$AVG[t_star:H,]
    }
- }
 
 
 
 
 
+# arrivato qui sistemare codice sotto
 
- 
+ #let's fix an a
 #
-irf_true = out_irfs$irf_true
+irf_true = True_IRFs$AVG[t_star:H,]
 
 irf_RESIT_avg = irf_true*0;
 irf_sr_avg = irf_true*0;
+irf_true_avg = irf_true*0;
 
 irf_RESIT_upper =irf_true*0;
 irf_RESIT_lower = irf_true*0;
 irf_sr_upper =  irf_true*0;
   irf_sr_lower =  irf_true*0;
-  for (ii in 1:N){
-  irf_RESIT_avg[,,ii] = rowMeans(irf_RESIT_boot[,,ii,],dims = 2)
-  irf_sr_avg[,,ii] = rowMeans(irf_sr_boot[,,ii,],dims=2)
-  
+
+  for (ii in k_star){
+  irf_RESIT_avg  = rowMeans(irf_RESIT_boot[,,],dims = 2)
+  irf_sr_avg  = rowMeans(irf_sr_boot[,,],dims=2)
+  irf_true_avg  = rowMeans(irf_true_boot[,,],dims = 2)
 
   #CI of 1 shocks
   irf_RESIT_upper[,ii,1] = apply(irf_RESIT_boot[,ii,1,],1 , 
