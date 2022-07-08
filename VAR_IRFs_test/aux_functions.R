@@ -15,7 +15,7 @@ generate_time_series <- function(N = 3,    T = 250 , sigma = 0.1,
       
       u[tt,1]=eps[tt,1];
       u[tt,2]=eps[tt,2]+f12(u[tt,1])
-      u[tt,3]=eps[tt,3]+f13(u[tt,1])+f23(u[tt,2])
+      u[tt,3]=eps[tt,3]+f13(u[tt,1])#+f23(u[tt,2])
       
       
       past=PI_1%*%Y[tt-1,]

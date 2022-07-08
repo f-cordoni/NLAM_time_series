@@ -64,7 +64,7 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
                 phi_hat = phi[[1]](aux_pa)
               }
               if (k ==3){
-                phi_hat = phi[[2]](aux_pa[1])+ phi[[3]](aux_pa[2])
+                phi_hat = phi[[2]](aux_pa[1])#+ phi[[3]](aux_pa[2])
               }
             }
             
@@ -93,7 +93,7 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
                 phi_hat = phi[[1]](aux_pa)
               }
               if (k ==3){
-                phi_hat = phi[[2]](aux_pa[1])+ phi[[3]](aux_pa[2])
+                phi_hat = phi[[2]](aux_pa[1])#+ phi[[3]](aux_pa[2])
               }
             }
             # phi_hat <- gpOut(model_phi,as.matrix(aux_pa))
