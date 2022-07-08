@@ -16,6 +16,7 @@ lines( irf_sr_upper[,2],col=3,lty=2)
 lines( irf_sr_lower[,2],col=3,lty=2)
 title(main=paste(sprintf("IRF %d -> %d",1,2),aux_s )   )
 
+
 plot.ts(irf_true[,3],xlim = c(1,20),ylim=c(-0.1, max(irf_true[,3])+0.05) )
 lines(irf_RESIT_avg[,3],col=2)
 lines( irf_RESIT_upper[,3],col=2,lty=2)
