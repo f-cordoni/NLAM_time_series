@@ -10,11 +10,20 @@ irf_sr_boot_a = list()
 parents_SR_across_all = array(0, dim = c(3,3,length(a),length(TT)))
 parents_resit_across_all = array(0, dim = c(3,3,length(a),length(TT)))
 
+MSE_resit = matrix(0,length(a),length(TT))
+MSE_sr = matrix(0,length(a),length(TT))
+TEST_diff_IRFs = list(list(1,2,3),list(1,2,3),list(1,2,3))  # t-test of mse of irfs1->2 1->3 on the first 5 points
+
+names(TEST_diff_IRFs) = c(a[1],a[2],a[3])
+for (ii in 1:length(a)){
+names(TEST_diff_IRFs[[ii]]) = c(TT[1],TT[2],TT[3])
+}
+
 for (iT in 1:length(TT)){
 for (ia in 1:length(a) ){
   aa  = a[ia]
   N=3
-  Nsim= 100
+  Nsim= 10
   T=TT[iT]  
   T_horizon = 20
   t_star = 2

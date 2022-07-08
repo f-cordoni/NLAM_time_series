@@ -142,7 +142,8 @@ get_structural_shocks_RESIT <- function(residual){
   
   graph_resit <- ICML(as.matrix(auxY), alpha = 0.05, model = "GP", parsModel = list(), 
                       indtest = dhsic.test, 
-                      parsIndtest = list(method = "ExactFastTrace"), confounder_check = 0, output = FALSE)
+                      parsIndtest = list(method = "ExactFastTrace"), 
+                      confounder_check = 0, output = FALSE)
   aux_graph=aux_graph+graph_resit
   
   shocks = auxY

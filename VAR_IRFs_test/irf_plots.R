@@ -6,7 +6,7 @@
   #   title(main=sprintf("IRF %d -> %d",1,jj))
   # }
  
-aux_s = sprintf(" a = %g, T = %g", a,T)
+aux_s = sprintf(" a = %g, T = %g", aa,T)
 plot.ts(irf_true[,2],xlim = c(1,20),ylim=c(0,max(irf_true[,2])+0.05) )
 lines(irf_RESIT_avg[,2],col=2)
 lines( irf_RESIT_upper[,2],col=2,lty=2)

@@ -177,7 +177,7 @@ for (ii in k_star){
 source("irf_plots.R")
 
 # qui salvare with a and T
-aux_s = sprintf("_a=%g_T=%g.csv", a,T)
+aux_s = sprintf("_a=%g_T=%g.csv", aa,T)
 write.csv(cbind(irf_RESIT_avg[,2],irf_RESIT_lower[,2],
                 irf_RESIT_upper[,2]),file = paste("IRF_2_NL_sim",aux_s ))
 
@@ -195,5 +195,5 @@ write.csv(cbind(irf_sr_avg[,3],irf_sr_lower[,3],
 write.csv(cbind(irf_true[,3]),file = paste("IRF_3_true_sim",aux_s ))
 
 
-
+source("testing_irfs.R")
 
