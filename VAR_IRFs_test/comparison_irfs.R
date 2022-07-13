@@ -20,10 +20,6 @@ set.seed(2021)
 
 par_sim=list()
 
-#1->2, 1->3, 2->3, 
-f12=function (x) x^2#1->2; 
-f13=function (x) sin(x^2)#sqrt(abs(x))# 1 ->3
-#f23=function (x) sin(x^2)
 
  
 
@@ -48,7 +44,19 @@ PI_1=aa*matrix(c(1,0,0,
  PI_1 = t(PI_1)
 
  
- 
+ #1->2, 1->3, 2->3, 
+ if (flag_irf_plots == 1){
+   f12=function (x) x^2#1->2; 
+   f13=function (x) sin(x^2)#sqrt(abs(x))# 1 ->3
+   #f23=function (x) sin(x^2)
+ }else{
+   
+   alfa = runif(1,min = 1, max = 4)
+   beta = runif(1,min = 1, max = 4)
+   
+   f12=function (x) x^alfa#1->2; 
+   f13=function (x) sin(x^beta)
+ }
  
 
  
@@ -173,7 +181,7 @@ for (ii in k_star){
   }
 }
 
-
+if (flag_irf_plots == 1){
 source("irf_plots.R")
 
 # qui salvare with a and T
@@ -194,6 +202,6 @@ write.csv(cbind(irf_sr_avg[,3],irf_sr_lower[,3],
 
 write.csv(cbind(irf_true[,3]),file = paste("IRF_3_true_sim",aux_s ))
 
-
+}
 source("testing_irfs.R")
 

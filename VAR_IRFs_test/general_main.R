@@ -2,6 +2,7 @@
 
 a = c (0.1,0.5,0.9)
 TT = c(250,500,1e3)
+flag_irf_plots = 0
 
 irf_true_boot_a = list()
 irf_RESIT_boot_a = list()
@@ -12,6 +13,10 @@ parents_resit_across_all = array(0, dim = c(3,3,length(a),length(TT)))
 
 MSE_resit = matrix(0,length(a),length(TT))
 MSE_sr = matrix(0,length(a),length(TT))
+
+SE_resit = MSE_resit
+SE_sr = MSE_sr
+
 TEST_diff_IRFs = list(list(1,2,3),list(1,2,3),list(1,2,3))  # t-test of mse of irfs1->2 1->3 on the first 5 points
 
 names(TEST_diff_IRFs) = c(a[1],a[2],a[3])
@@ -36,3 +41,17 @@ source("comparison_irfs.R")
   parents_resit_across_all[,,ia,iT] = parents_resit_all
 }
 }
+
+MEAN_RESIT_parents = array(0,dim =c(3,3,3))
+SE_RESIT_parents =array(0,dim =c(3,3,3))
+for ( ii in 1:3){
+  for(jj in 1:3){
+    MEAN_RESIT_parents[ii,jj,]  = apply(parents_resit_across_all[ii,jj,,],MARGIN = 2,mean)
+    SE_RESIT_parents[ii,jj,] =  apply(parents_resit_across_all[ii,jj,,],
+                                     MARGIN = 2,sd)/sqrt(3)
+  }
+  }
+rowSums(parents_resit_across_all[,,,1],dims=2)/3
+rowSums(parents_resit_across_all[,,,2],dims=2)/3
+rowSums(parents_resit_across_all[,,,3],dims=2)/3
+
