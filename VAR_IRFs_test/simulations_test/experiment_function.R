@@ -1,6 +1,6 @@
 experiment2parralel <- function(p,T,pCon,linear,pars,expCounter)
 {
-    res <- rep(NA,6)
+    res <- rep(NA,14)
     cat("\r p =",p,", n =",T, ", exp = ", expCounter, "\r")
 
     # Generate data
@@ -165,25 +165,25 @@ experiment2parralel <- function(p,T,pCon,linear,pars,expCounter)
     }
     
     if(linear=="STVAR"){
+    
+     
       trueB <- randomB(trueG,0.1,2,TRUE)
       X <- sampleDataFromG(T+1,trueG,funcType="GAM", parsFuncType=list(kap=1,sigmax=1,sigmay=1,output=FALSE), 
-                           noiseType="normalRandomVariances", parsNoise=list(noiseExp=1,varMin=1,varMax=2))
+                          noiseType="normalRandomVariances", parsNoise=list(noiseExp=1,varMin=1,varMax=2))
       X <- as.matrix(X)
       #is the contemporaneous effect noise
       
+      #X = cbind(rnorm(T+1),0.75*rnorm(T+1),0.25*rnorm(T+1),0.5*rnorm(T+1))
       
       Y=matrix(NA,T+1,p)
-      u= X
+      u = X
       Y_0=c(0.5, 0, -0.5,0.25); Y[1,]=Y_0;
       PI_1=diag(runif(p))
       past=u*0
       
-      f_past1=function (x) sqrt(abs(x))
-      f_past2=function (x) cos(x^3)
-      f_past3=function (x) sin(x)
-      f_past4=function (x) sin(x^2)
+ 
       
-      theta=1; c=-1.5#-1.5;#try 0
+      theta=-0.5; c=-0.5*T#-1.5;#try 0
       
       if (pars$flag_st_function=='exp') {
         F<-function(z) 1-exp(-theta*( (z-c)^2)  )
@@ -193,12 +193,16 @@ experiment2parralel <- function(p,T,pCon,linear,pars,expCounter)
       
       B_1=diag(runif(p,min=-1,max=1))
       B_2=diag(runif(p,min=-1,max=1))
-      z=rnorm(T,mean=0,sd=1);
+      
+ 
+      z=1:T;
       for (tt in 2:(T+1)){
         
         
         
         past=(1-F(z[tt-1]))*B_1%*%Y[tt-1,]+F(z[tt-1])*B_2%*%Y[tt-1,]
+        
+         
         
         Y[tt,1]=past[1]+u[tt,1] 
         Y[tt,2]=past[2]+u[tt,2];  
@@ -471,6 +475,8 @@ experiment2parralel <- function(p,T,pCon,linear,pars,expCounter)
     SigmaHat <- cov(X)
     
     
+    
+    
     # RESIT (in the code also called ICML)
     if(linear=="VAR+NonGauss")
     {
@@ -484,7 +490,7 @@ experiment2parralel <- function(p,T,pCon,linear,pars,expCounter)
     }
 
     
-    
+     
     
     res[1] <- structIntervDist(trueG, resICML)$sid
     res[2] <- hammingDistance(trueG, resICML)
@@ -495,14 +501,53 @@ experiment2parralel <- function(p,T,pCon,linear,pars,expCounter)
     resLINGAM <- lingamWrap(X)$Adj
     res[3] <- structIntervDist(trueG, resLINGAM*1)$sid
     res[4] <- hammingDistance(trueG, resLINGAM*1)
+
+    # PC
+    resPC <- pcWrap(X, 0.01, mmax = Inf)
+    res[5] <- structIntervDist(trueG, resPC)$sid
+    res[6] <- hammingDistance(trueG, resPC)
+
+
+    # cPC
+    rescPC <- cpcWrap(X, 0.01, mmax = Inf)
+    res[7] <- structIntervDist(trueG, rescPC)$sid
+    res[8] <- hammingDistance(trueG, rescPC)
      
+    # BF
+    #  setwd("../../codeANM/code/experiments/ANM/")
+    # tic()
+    # pars <- list(regr.method = train_linear, 
+    #          regr.pars = list(), 
+    #          indtest.method = dhsic.test, indtest.pars = list())
+    # resBFtmp <- BruteForce(X , "SEMIND", pars , output = FALSE)
+    # toc()
+    # setwd("../../../../code/simulations_comparison/")
+    resBF <- rescPC*0
+    res[9] <- structIntervDist(trueG, resBF*1)$sid
+    res[10] <- hammingDistance(trueG, resBF*1)
+
+
+   #CAM
+   resCAM <- CAM(X, scoreName = "SEMGAM", 
+              parsScore = list(numBasisFcts=10),   
+              maxNumParents = min(dim(X)[2] - 1, round(dim(X)[1]/20)),
+              variableSel = TRUE, 
+              variableSelMethodPars = list(atLeastThatMuchSelected = 0.02, atMostThatManyNeighbors = 10),
+              pruning = TRUE) 
+     resCAM = resCAM$Adj
+    res[11] <- structIntervDist(trueG, resCAM)$sid
+    res[12] <- hammingDistance(trueG, resCAM)
+
+       
 
 
     #RANDOM
     resRand <- as.matrix(randomDAG(p,runif(1)))
-    res[5] <- structIntervDist(trueG, resRand)$sid
-    res[6] <- hammingDistance(trueG, resRand)      
-   
+    res[13] <- structIntervDist(trueG, resRand)$sid
+    res[14] <- hammingDistance(trueG, resRand)      
+    
+    
+
     
     return(res)
 }

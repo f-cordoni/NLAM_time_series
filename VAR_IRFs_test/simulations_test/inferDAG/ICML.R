@@ -1,114 +1,51 @@
-indtestAll <- function(f,x,y,alpha,pars = list())
-{
-result<-dhsic.test(x,y,pairwise=FALSE,method = "gamma",kernel = "gaussian")
+# Copyright (c) 2010 - 2012  Jonas Peters  [jonas.peters@tuebingen.mpg.de]
+# All rights reserved.  See the file COPYING for license terms. 
+#
+# Explanation:
+#
+# M: nxp matrix with n being sample size and p the number of variables 
+# alpha: significance level of the independence test
+# model: assumed model for regression (e.g. train_linear, train_gam or train_gp). See fitting_ts.R. 
+# indtest: the independence test that should be performed (e.g. indtestHsic).
+# confounder_check (only for DAG mode): if TRUE, partial causal discovery method is applied.
+# check_ind_of_res: if TRUE, the method additionally checks the independence of residuals. 
 
-}
 
-train_model <- function(flag,X,y,pars = list())
-{
-switch(flag, 
-linear={
-    mod <- lm(y ~ X)
-    result <- list()
-    result$Yfit = as.matrix(mod$fitted.values)
-    result$residuals = as.matrix(mod$residuals)
-    result$model = mod
-     return(result)
-},
-GP={
-  options=gpOptions("ftc")
-    options$kern$comp=list("rbf","white")
-    #options$learnScales=TRUE
-    model<-gpCreate(dim(X)[2],1,X,y,options)
-    y2<-gpOut(model,X)
-    model$Yfit<-y2
-    model$residuals<- (y-y2)
-    return(model)
-},
-GAM={
-library(mgcv)
-numBasisFcts = 1
-
-  
-        pars$numBasisFcts = 1
- 
-    p <- dim(as.matrix(X))
-    if(p[1]/p[2] < 3*pars$numBasisFcts)
-    {
-        pars$numBasisFcts <- ceiling(p[1]/(3*p[2]))
-        cat("changed number of basis functions to    ", pars$numBasisFcts, "    in order to have enough samples per basis function\n")
-    }
-    dat <- data.frame(as.matrix(y),as.matrix(X))
-    coln <- rep("null",p[2]+1)
-    for(i in 1:(p[2]+1))
-    {
-     
-        coln[i] <- paste("var",i,sep="")
-    }
-    colnames(dat) <- coln
-    labs<-"var1 ~ "
-    if(p[2] > 1)
-    {
-        for(i in 2:p[2])
-        {
-            #labs<-paste(labs,"s(var",i,",k = ",pars$numBasisFcts,") + ",sep="")
-                   labs<-paste(labs,"s(var",i,") + ",sep="")
-            # labs<-paste(labs,"lo(var",i,") + ",sep="")
-        }
-    }
-    #labs<-paste(labs,"s(var",p[2]+1,",k = ",pars$numBasisFcts,")",sep="")
-     labs<-paste(labs,"s(var",p[2]+1,")",sep="")
-    # labs<-paste(labs,"s(var",p[2]+1,", bs = "cc")",sep="") #factor 2 faster
-    # labs<-paste(labs,"s(var",p[2]+1,", bs = "cr")",sep="") # factor 2 + eps faster
-    # labs<-paste(labs,"lo(var",p[2]+1,")",sep="")
-    mod_gam <- FALSE
-    try(mod_gam <- gam(formula=formula(labs), data=dat),silent = TRUE)
-    if(typeof(mod_gam) == "logical")
-    {
-        cat("There was some error with gam. The smoothing parameter is set to zero.\n")
-        labs<-"var1 ~ "
-        if(p[2] > 1)
-        {
-            for(i in 2:p[2])
-            {
-                labs<-paste(labs,"s(var",i,",k = ",pars$numBasisFcts,",sp=0) + ",sep="")
-            }
-        }
-        labs<-paste(labs,"s(var",p[2]+1,",k = ",pars$numBasisFcts,",sp=0)",sep="")
-        mod_gam <- gam(formula=formula(labs), data=dat)
-    }
-    result <- list()
-    result$Yfit <- as.matrix(mod_gam$fitted.values)
-    result$residuals <- as.matrix(mod_gam$residuals)
-    result$model <- mod_gam 
-    result$df <- mod_gam$df.residual     
-    result$edf <- mod_gam$edf     
-    result$edf1 <- mod_gam$edf1     
-    
-    # for degree of freedom see mod_gam$df.residual
-    # for aic see mod_gam$aic
-    return(result)
-},
-print('Error 42')
-)
-    
-}
 
 fit_and_test_independence <- function(x,y,z,alpha,model,parsModel = list(),indtest, parsIndtest)
     # fits x using y and tests against z
 {
     y <- as.matrix(y)
     z <- as.matrix(z)
-    x<-as.matrix(x)
+    
     ####
     # fit x using y
     ####
     mod_fit <- train_model(model,y,x,parsModel)
-    r2 <- mod_fit$residuals
+    r2 <- mod_fit$resid
     
     Tquan <- indtestAll(indtest,z,r2,alpha,parsIndtest)
     return(Tquan)
 }
+
+
+list_subsets <- function(n,k)
+{
+    a<-matrix(0,n^k,k)
+    for(i in 1:k)
+    {
+        a[,i] <- rep(1:n,each=n^(k-i),times=n^(i-1))
+    }
+    for(i in 1:(n^k))
+    {
+        if(length(unique(a[i,])) < k)
+        {
+            a <- a[-c(i),]
+        }
+    }
+    a<-a
+}
+
 
 
 ICML <- function(M, alpha = 0.05, model = train_linear, parsModel = list(), indtest = indtestHsic, parsIndtest = list(method = "ExactFastTrace"), confounder_check = 0, output = FALSE)
@@ -158,7 +95,104 @@ ICML <- function(M, alpha = 0.05, model = train_linear, parsModel = list(), indt
                 }
             }
         }
- 
+        #         if(1==0) 
+        #             #        if(sum(check<0)==0) #no possible sink node found
+        #         {
+        #             if(confounder_check>0 && length(S)>2)
+        #             {
+        #                 show("Since no possible sink node was found, the algorithm tries to omit dimensions...")
+        #                 for(sizesubset in 1:confounder_check)
+        #                 {
+        #                     print(paste("tries to omit", sizesubset, "dimension(s) of the time series..."))
+        #                     a <- list_subsets(length(S),sizesubset)
+        #                     pp <- dim(a)		
+        #                     check2 <- matrix(0,pp[1],length(S)-pp[2])
+        #                     show("Does omitting variables help?")
+        #                     for(k in 1:pp[1])
+        #                     {
+        #                         #S[a[k,]] werden entfernt
+        #                         S_new <- S
+        #                         S_new <- S_new[-a[k,]]
+        #                         for(kk in 1:length(S_new))
+        #                         {
+        #                             #Is i possible sink?
+        #                             i <- S_new[kk]	                
+        #                             S2_new <- S_new
+        #                             S2_new <- S2_new[-c(kk)]
+        #                             Fc <- fit_and_test_independence(M[,i],M[,S2_new],M[,S2_new],alpha,model,parsModel,indtest,parsIndtest)
+        #                             check2[k,kk] <- Fc[1]-Fc[2]
+        #                             print(paste("omitting: ", paste(S[a[k,]],collapse=" "), "Sink ", i, " leads to ", Fc[1]-Fc[2], " (<0 independence)."))
+        #                         }
+        #                     }
+        #                     if(sum(sum(check2<0))>0)
+        #                     {
+        #                         #found something!
+        #                         stopping <- 0
+        #                         pp <- dim(check2)
+        #                         k1 <- which.min(check2)
+        #                         k2 <- (k1-1)%/%pp[1]+1
+        #                         k1 <- k1%%pp[1]
+        #                         if(k1==0)
+        #                         {
+        #                             k1 <- pp[1]
+        #                         }
+        #                         S_new <- S
+        #                         S_new <- S_new[-a[k1,]]
+        #                         variable[(d):(d+sizesubset-1)] <- S[a[k1,]]
+        #                         err[(d):(d+sizesubset-1)] <- rep(1,sizesubset)
+        #                         for(iii in 1:sizesubset)
+        #                         {
+        #                             for(jjj in 1:length(S))
+        #                             {
+        #                                 C[S[a[k1,iii]],S[jjj]] <- -1
+        #                                 C[S[jjj],S[a[k1,iii]]] <- -1
+        #                             }
+        #                         }
+        #                         
+        #                         variable[d+sizesubset] <- S_new[k2]
+        #                         S <- S_new[-k2]
+        #                         parlen[d+sizesubset] <- length(S)
+        #                         par[d+sizesubset,1:length(S)] <- S
+        #                         
+        #                         d<-d+sizesubset
+        #                         break
+        #                     }	    
+        #                 } # end for
+        #                 
+        #                 if(stopping==1)
+        #                 {
+        #                     show("Not even omitting variables helped. Stop the search.")
+        #                     err[d:(p-1)] <- rep(1,(p-d))
+        #                     for(i in 2:length(S))
+        #                     {
+        #                         for(j in 1:(i-1))
+        #                         {
+        #                             C[S[i],S[j]] <- -1
+        #                             C[S[j],S[i]] <- -1
+        #                         }
+        #                     }
+        #                     break
+        #                 }
+        #                 check2 <- rep(0,p-1)
+        #                 stopping <- 1
+        #             }
+        #             else # no possible sink node and confounder_check disabled
+        #             {
+        #                 show("No possible sink node found. Stop the search.")
+        #                 err[d:(p-1)] <- rep(1,(p-d))
+        #                 for(i in 2:length(S))
+        #                 {
+        #                     for(j in 1:(i-1))
+        #                     {
+        #                         C[S[i],S[j]]<-88
+        #                         C[S[j],S[i]]<-88
+        #                     }
+        #                 }
+        #                 break
+        #             }
+        #         }
+        #         else #possible sink node found
+        #         {
         bb <- which.min(check)
         variable[d] <- S[bb]
         S <- S[-c(bb)]
@@ -222,8 +256,7 @@ ICML <- function(M, alpha = 0.05, model = train_linear, parsModel = list(), indt
             #todo: always hsic?
             #todo: change code...
             if(1==0)
-            {     
-            ####### not RUN            
+            {                 
                 print(paste("...and performing final independence test using HSIC..."))
                 if(length(S)>0)
                     #if(indtest != indtestts_hsic & length(S)>0)
@@ -242,7 +275,6 @@ ICML <- function(M, alpha = 0.05, model = train_linear, parsModel = list(), indt
                 }
                 show(sprintf("Test statistic: %.3f and critical value: %.3f and p-value %.2e", Fc[1],Fc[2],Fc[3]))        
                 indtest_at_end[d] <- sign(Fc[1]-Fc[2])
-             ####### not RUN            
             }
             else
             {
@@ -272,3 +304,5 @@ ICML <- function(M, alpha = 0.05, model = train_linear, parsModel = list(), indt
         return(NULL)
     }
 }
+
+
