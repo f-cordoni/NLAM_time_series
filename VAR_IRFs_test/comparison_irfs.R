@@ -54,15 +54,19 @@ PI_1=aa*matrix(c(1,0,0,
    alfa = runif(1,min = 1, max = 4)
    beta = runif(1,min = 1, max = 4)
    
-   f12=function (x) x^alfa#1->2; 
-   f13=function (x) sin(x^beta)
+   f12<-function(x, a = alfa){ 
+     aux = abs(x)^a 
+   return(aux)}#1->2; 
+   f13<-function (x, b = beta ){ 
+     aux = sin(abs(x)^b)
+     return(aux) }
  }
  
 
  
 #generate time series
 Y_out = generate_time_series (N = 3,  T = T , sigma = 0.1,
-                                 PI_1  = PI_1, f12 = f12, f13  = f13, f23 = f23)
+                                 PI_1  = PI_1, f12 = f12, f13  = f13)
 #estimate the VAR
 Y = Y_out$Y
 out_var = VAR_estimation(Y = Y)
@@ -100,7 +104,13 @@ C_IRFS_resit = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = k_star,
                           phi = phi_resit, Pa = parents_resit , 
                           flag_resit = 1, q_alfa = 0.68)
 
-S = t(chol(cov(out_var$residuals)))
+#S = t(chol(cov(out_var$residuals)))
+#Sigma_u<-cov(ures) ## this is not a consistent estimator!
+ures <- out_var$residuals
+Lag = 1
+Sigma_u<-(t(ures)%*%ures) / (nrow(ures)-1-ncol(ures)*Lag) ## denominator: (T - kp -1). This is a consistent estimator
+S<-t(chol(Sigma_u)) 
+
 parents_SR = t(S!=0)*1-diag(N)
 S_shocks_chol = t( solve(S) %*% t(out_var$residuals))
 

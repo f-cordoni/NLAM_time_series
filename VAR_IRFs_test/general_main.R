@@ -2,8 +2,7 @@
 
 a = c (0.1,0.5,0.9)
 TT = c(250,500,1e3)
-flag_irf_plots = 0
-
+ 
 irf_true_boot_a = list()
 irf_RESIT_boot_a = list()
 irf_sr_boot_a = list()
@@ -28,7 +27,7 @@ for (iT in 1:length(TT)){
 for (ia in 1:length(a) ){
   aa  = a[ia]
   N=3
-  Nsim= 100
+  Nsim= 200
   T=TT[iT]  
   T_horizon = 20
   t_star = 2
