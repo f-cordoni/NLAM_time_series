@@ -17,7 +17,7 @@ setwd("CAM_R/")
 sapply(files.sources, source)
 setwd("../")
 
- 
+
 source("utils/startupLINGAM.R", chdir = TRUE)
 source("utils/startupGDS.R", chdir = TRUE)
 source("utils/startupPC.R", chdir = TRUE)
@@ -70,21 +70,50 @@ library(dHSIC)
 source("experiment_function.R")
 
 
-N=3# try 3,4 8
-p=N
+
+
+
+P = c(4,6,8)
+T=c(250,500,1e3)
+
+table_SID_all = list(NA,NA,NA)
+names(table_SID_all) = c(P)
+
+for (ii in 1:3){
+  table_SID_all[[ii]] = list(NA,NA,NA)
+  names( table_SID_all[[ii]] ) = c(T)
+}
+
+table_HD_all = table_SID_all
+
+
 Nsim=500
 
-T=500
+for (pp in 1:length(P)){
+ for(tt in 1:length(T)){  
+
+
+N=P[pp]# try 3,4 8
+p=N
+TT = T[tt]
 
 pCon <- 2/(p-1)
 noiseVar <- rep(1,p)
 
-#Var+Non GAuss
+
+
+
 library(parallel)
+#VAR +linear
+ 
+
+#Var+Non GAuss
 pars <- list( regr.pars = list(),indtest.pars = list())
+#experiment2parralel (4,T = TT,pCon,linear="VAR+NonGauss",pars,1)
+
 respar_VARNG<-mcmapply(experiment2parralel,
                  MoreArgs=list(p=p,T=TT,pCon=pCon,
-            linear="VAR+NonGauss", pars = pars),1:Nsim,  mc.cores = 6)
+            linear="VAR+NonGauss", pars = pars),1:Nsim,  mc.cores = 8)
 
 #Var+Non Linear
 pars <- list( regr.pars = list(),indtest.pars = list())
@@ -93,119 +122,40 @@ respar_VARNL<-mcmapply(experiment2parralel,
                              linear="VAR+Nonlinear",
                              pars = pars),1:Nsim, mc.cores= 8)
 
-#Nonlinear+Non Linear
-pars <- list( regr.pars = list(),indtest.pars = list())
-respar_NLNL<-mcmapply(experiment2parralel,
-                    MoreArgs=list(p=p,T=TT,pCon=pCon,
-                                  linear="NL+NL", pars = pars),
-                    1:Nsim,mc.cores= 8)
-
-pars <- list( regr.pars = list(),indtest.pars = list())
-pars=list(flag_st_function='logi')
-respar_STVAR<-mcmapply(experiment2parralel,
-                      MoreArgs=list(p=p,T=TT,
-                                    pCon=pCon,linear="STVAR", 
-                                    pars = pars),1:Nsim,
-                      mc.cores = 8)
-
-pars <- list( regr.pars = list(),indtest.pars = list())
-respar_TVVAR<-mcmapply(experiment2parralel,
-               MoreArgs=list(p=p,T=TT,pCon=pCon,
-                             linear="TV-VAR", pars = pars),
-               1:Nsim,mc.cores = 8)
-if (p==3){
-save(respar_VARNL,
-     respar_VARNG,respar_NLNL,
-     respar_STVAR,respar_TVVAR,file = "respar_p_3.RData")
-} 
-if (p==4){
-  save(respar_VARNL,
-       respar_VARNG,respar_NLNL,
-       respar_STVAR,respar_TVVAR,file = "respar_p_4.RData")
-}
-if (p==10){
-  save(respar_VARNL,
-       respar_VARNG,respar_NLNL,
-       respar_STVAR,respar_TVVAR,file = "respar_p_10.RData")
-}
+ 
 
 
 
-respar = respar_VARNL
-
-
-sidicmlDAG <- round(mean(respar[1,]),2)
-sidicmlDAGsd <- round(sd(respar[1,]),2)
-hdicmlDAG <- round(mean(respar[2,]),2)
-hdicmlDAGsd<- round(sd(respar[2,]),2)
-
-sidlingamDAG <- round(mean(respar[3,]),2)
-sidlingamDAGsd <- round(sd(respar[3,]),2)
-hdlingamDAG<- round(mean(respar[4,]),2)
-hdlingamDAGsd <- round(sd(respar[4,]),2)
-
-sidPCDAG <- round(mean(respar[5,]),2)
-sidPCDAGsd <- round(sd(respar[5,]),2)
-hdPCDAG<- round(mean(respar[6,]),2)
-hdPCDAGsd <- round(sd(respar[6,]),2)
-
-sidCPCDAG <- round(mean(respar[7,]),2)
-sidCPCDAGsd <- round(sd(respar[7,]),2)
-hdCPCDAG<- round(mean(respar[8,]),2)
-hdCPCDAGsd <- round(sd(respar[8,]),2)
-
-sidBFDAG <- round(mean(respar[9,]),2)
-sidBFDAGsd <- round(sd(respar[9,]),2)
-hdBFDAG<- round(mean(respar[10,]),2)
-hdBFDAGsd <- round(sd(respar[10,]),2)
-
-sidCAMDAG <- round(mean(respar[11,]),2)
-sidCAMDAGsd <- round(sd(respar[11,]),2)
-hdCAMDAG<- round(mean(respar[12,]),2)
-hdCAMDAGsd <- round(sd(respar[12,]),2)
-
-sidrandDAG <- round(mean(respar[13,]),2)
-sidrandDAGsd <- round(sd(respar[13,]),2)
-hdrandDAG <- round(mean(respar[14,]),2)
-hdrandDAGsd <- round(sd(respar[14,]),2)
  
  
-table_SID = matrix(NA,7,10)
+table_SID = matrix(NA,7,4)
 row.names(table_SID) = c("ICML","LINGAM",
                          "PC","CPC","BF",
                          "CAM","RANDOM")
-table_HD = matrix(NA,7,10)
+table_HD = matrix(NA,7,4)
 row.names(table_HD) = c("ICML","LINGAM",
                          "PC","CPC","BF",
                          "CAM","RANDOM")
-colnames(table_SID)=rep(c("mean","sd"),5)
-colnames(table_HD)=rep(c("mean","sd"),5)
+colnames(table_SID)=rep(c("mean","se"),2)
+colnames(table_SID)[c(1,3)] = c("NL-avg","NG-avg")
+colnames(table_HD)=rep(c("mean","se"),2)
+colnames(table_HD)[c(1,3)] = c("NL-avg","NG-avg")
 
 for (ii in 1:7){
 table_SID[ii,] = c(round(mean(respar_VARNL[2*ii-1,]),2),
-                  round(sd(respar_VARNL[2*ii-1,]),2),
+                  round(sd(respar_VARNL[2*ii-1,]),2)/sqrt(Nsim),
                   round(mean(respar_VARNG[2*ii-1,]),2),
-                  round(sd(respar_VARNG[2*ii-1,]),2),
-                  round(mean(respar_NLNL[2*ii-1,]),2),
-                  round(sd(respar_NLNL[2*ii-1,]),2),
-                  round(mean(respar_STVAR[2*ii-1,]),2),
-                  round(sd(respar_STVAR[2*ii-1,]),2),
-                    round(mean(respar_TVVAR[2*ii-1,]),2),
-                  round(sd(respar_TVVAR[2*ii-1,]),2)
+                  round(sd(respar_VARNG[2*ii-1,]),2)/sqrt(Nsim) 
                   )
 
 table_HD[ii,] = c(round(mean(respar_VARNL[2*ii,]),2),
-                   round(sd(respar_VARNL[2*ii,]),2),
+                   round(sd(respar_VARNL[2*ii,]),2)/sqrt(Nsim),
                    round(mean(respar_VARNG[2*ii,]),2),
-                   round(sd(respar_VARNG[2*ii,]),2),
-                   round(mean(respar_NLNL[2*ii,]),2),
-                   round(sd(respar_NLNL[2*ii,]),2),
-                   round(mean(respar_STVAR[2*ii,]),2),
-                   round(sd(respar_STVAR[2*ii,]),2),
-                   round(mean(respar_TVVAR[2*ii,]),2),
-                   round(sd(respar_TVVAR[2*ii,]),2)
-)
+                   round(sd(respar_VARNG[2*ii,]),2)/sqrt(Nsim) )
 }
 
- 
+table_SID_all[[pp]][[tt]] = table_SID
+  table_HD_all[[pp]][[tt]] = table_HD
+ }
+  }
 

@@ -242,11 +242,11 @@ sampleDataFromGLinear <- function(n,G,parsFuncType,noiseType,parsNoise)
     {
         # Specify pseudo distributions
         distri <- list(
-            type=c("mixt.gaussian","mixt.gaussian","mixt.gaussian","mixt.gaussian"),
-            df=c(NaN,NaN,NaN,NaN),
-            p=c(.5,.5,.5,.5),
-            mu=c(.5,.05,.25,.1),
-            sigma=c(0.25,1.3,0.5,0.9)
+            type=rep("mixt.gaussian",p),#"mixt.gaussian","mixt.gaussian","mixt.gaussian"),
+            df=rep(NA,p),
+            p=rep(.5,N),#.5,.5,.5),
+            mu=runif(p,0.05,0.5),#c(.5,.05,.25,.1),
+            sigma=runif(p,0.25,1)#c(0.25,1.3,0.5,0.9)
         )
         
         N <- as.matrix(simul.distri(distri = distri,nb.sim =n))

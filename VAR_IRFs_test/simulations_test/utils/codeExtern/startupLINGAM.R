@@ -14,8 +14,8 @@ sourceDir = function(path, trace = FALSE)
 
 
 library(clue)
-sourceDir("./bayeslingam/rlingam/", trace = FALSE)
-sourceDir("./bayeslingam/common/")
+sourceDir("bayeslingam/rlingam/", trace = FALSE)
+sourceDir("bayeslingam/common/")
 #sourceDir("./bayeslingam/ETUDAG/")
 
 source("../lingamWrap.R")

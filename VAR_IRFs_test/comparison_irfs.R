@@ -105,8 +105,9 @@ C_IRFS_resit = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = k_star,
                           flag_resit = 1, q_alfa = 0.68)
 
 #S = t(chol(cov(out_var$residuals)))
-#Sigma_u<-cov(ures) ## this is not a consistent estimator!
+#Sigma_u<-cov(ures) ## this is not a consistent estimator! t( t(x)-colMeans(x) )
 ures <- out_var$residuals
+ures <- t( t(ures)-colMeans(ures) )# demean data
 Lag = 1
 Sigma_u<-(t(ures)%*%ures) / (nrow(ures)-1-ncol(ures)*Lag) ## denominator: (T - kp -1). This is a consistent estimator
 S<-t(chol(Sigma_u)) 
@@ -192,7 +193,7 @@ for (ii in k_star){
 }
 
 if (flag_irf_plots == 1){
-source("irf_plots.R")
+#source("irf_plots.R")
 
 # qui salvare with a and T
 aux_s = sprintf("_a=%g_T=%g.csv", aa,T)
