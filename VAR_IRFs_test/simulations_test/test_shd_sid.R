@@ -159,3 +159,48 @@ table_SID_all[[pp]][[tt]] = table_SID
  }
   }
 
+
+for (pp in 1:3){
+  for (tt in 1:3){
+    
+    AUX =     table_HD_all[[pp]][[tt]]
+    
+    AUX_new = matrix(0,nrow = nrow(AUX)*2,ncol = 2)
+    rownames(AUX_new)= c(rownames(AUX),rownames(AUX))
+    rownames(AUX_new)[seq(1, nrow(AUX)*2,2)] = rownames(AUX)
+    rownames(AUX_new)[seq(2, nrow(AUX)*2,2)] = c("")
+    
+    colnames(AUX_new) = colnames(AUX)[c(1,3)]
+
+    ii = 1:nrow(AUX)
+    aux_i = 2*ii-1
+    AUX_new[c(aux_i),1] = AUX[ii,1]
+    AUX_new[c(aux_i),2] = AUX[ii,3]
+    
+    AUX_new[c(aux_i+1),1] = round(AUX[ii,2],3)
+    AUX_new[c(aux_i+1),2] = round(AUX[ii,4],3)
+    
+    table_HD_all[[pp]][[tt]] = AUX_new
+    
+    AUX =     table_SID_all[[pp]][[tt]]
+    
+    AUX_new = matrix(0,nrow = nrow(AUX)*2,ncol = 2)
+    rownames(AUX_new)= c(rownames(AUX),rownames(AUX))
+    rownames(AUX_new)[seq(1, nrow(AUX)*2,2)] = rownames(AUX)
+    rownames(AUX_new)[seq(2, nrow(AUX)*2,2)] = c("")
+    
+    colnames(AUX_new) = colnames(AUX)[c(1,3)]
+    
+    ii = 1:nrow(AUX)
+    aux_i = 2*ii-1
+    AUX_new[c(aux_i),1] = AUX[ii,1]
+    AUX_new[c(aux_i),2] = AUX[ii,3]
+    
+    AUX_new[c(aux_i+1),1] = round(AUX[ii,2],3)
+    AUX_new[c(aux_i+1),2] = round(AUX[ii,4],3)
+    table_SID_all[[pp]][[tt]] = AUX_new
+     
+    
+  }
+}
+

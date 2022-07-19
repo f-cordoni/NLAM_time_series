@@ -28,8 +28,8 @@ d=e_RESIT-e_sr
 MSE_resit[ia,iT] = mean(e_RESIT)
 MSE_sr[ia,iT] = mean(e_sr)
 
-SE_resit[ia,iT] = sd(e_RESIT)/length(e_RESIT)
-SE_sr[ia,iT] = sd(e_sr)/length(e_sr)
+SE_resit[ia,iT] = sd(e_RESIT)/sqrt(length(e_RESIT))
+SE_sr[ia,iT] = sd(e_sr)/sqrt(length(e_sr))
 
 TEST_diff_IRFs[[ia]][[iT]] = t.test(d)
 
