@@ -55,7 +55,13 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
             
             if (flag_resit == 2){
               #Choleski
-              phi_hat  = S[k,] %*% U_delta[hh,]
+              iC = solve(S)
+              D = diag(iC)
+              B0 = D - iC # iC = D- B_0
+              
+                 
+              phi_hat  = B0[k,] %*% U_delta[hh,]
+              # phi_hat  = S[k,] %*% U_delta[hh,]
             }
             
             if (flag_resit == 3){
@@ -84,7 +90,14 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
             if (flag_resit == 2){
               
               #Choleski
-              phi_hat  = S[k,] %*% U[hh,]
+              # phi_hat  = S[k,] %*% U[hh,]
+              
+              iC = solve(S)
+              D = diag(iC)
+              B0 = D - iC # iC = D- B_0
+              
+          
+              phi_hat  = B0[k,] %*% U[hh,]
             }
             
             if (flag_resit == 3){
@@ -104,9 +117,18 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
             #CONTROLLARE QUI il ciclo almeno su kk deve terminare
         }
            #difference
+        iC = solve(S)
+        D = diag(iC)
+        B0 = D - iC # iC = D- B_0
+        if (flag_resit == 2){
+          Y_delta_nn[t_star+hh-1, ] = PI_hat %*% Y_delta_nn[t_star+hh-2 ,] + solve(D) %*% U_delta[hh, ] 
+          
+          Y_nn[t_star+hh-1, ] = PI_hat %*% Y_nn[t_star+hh-2 ,] + solve(D) %*%U[hh, ] 
+        }else{
           Y_delta_nn[t_star+hh-1, ] = PI_hat %*% Y_delta_nn[t_star+hh-2 ,] + U_delta[hh, ] 
           
           Y_nn[t_star+hh-1, ] = PI_hat %*% Y_nn[t_star+hh-2 ,] + U[hh, ] 
+        }
           I_delta [hh , ]  = Y_delta_nn[t_star+hh -1, ] - Y_nn[t_star+hh -1, ] 
       }
       I_delta_nn [,,nn] = I_delta
