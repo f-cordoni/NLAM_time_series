@@ -56,7 +56,7 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
             if (flag_resit == 2){
               #Choleski
               iC = solve(S)
-              D = diag(iC)
+              D = diag(diag(iC))
               B0 = D - iC # iC = D- B_0
               
                  
@@ -93,7 +93,7 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
               # phi_hat  = S[k,] %*% U[hh,]
               
               iC = solve(S)
-              D = diag(iC)
+              D = diag(diag(iC))
               B0 = D - iC # iC = D- B_0
               
           
@@ -118,7 +118,7 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
         }
            #difference
         iC = solve(S)
-        D = diag(iC)
+        D = diag(diag(iC))
         B0 = D - iC # iC = D- B_0
         if (flag_resit == 2){
           Y_delta_nn[t_star+hh-1, ] = PI_hat %*% Y_delta_nn[t_star+hh-2 ,] + solve(D) %*% U_delta[hh, ] 
