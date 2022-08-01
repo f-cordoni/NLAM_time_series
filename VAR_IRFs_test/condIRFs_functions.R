@@ -113,22 +113,27 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
             U [hh,k] = phi_hat + E_tilde[hh,k] 
 
           }
-          # generate time series 
-            #CONTROLLARE QUI il ciclo almeno su kk deve terminare
+          
+          if (flag_resit == 2){
+            #scaling for Choleski
+            iC = solve(S)
+            D = diag(diag(iC))
+            B0 = D - iC # iC = D- B_0
+            
+            iD = solve(D)
+            
+            U_delta[hh,k ] = iD[k,k] * U_delta[hh,k ]
+            
+            U [hh,k]  = iD[k,k] * U [hh,k] 
+          }
+ 
         }
            #difference
-        iC = solve(S)
-        D = diag(diag(iC))
-        B0 = D - iC # iC = D- B_0
-        if (flag_resit == 2){
-          Y_delta_nn[t_star+hh-1, ] = PI_hat %*% Y_delta_nn[t_star+hh-2 ,] + solve(D) %*% U_delta[hh, ] 
-          
-          Y_nn[t_star+hh-1, ] = PI_hat %*% Y_nn[t_star+hh-2 ,] + solve(D) %*%U[hh, ] 
-        }else{
+
           Y_delta_nn[t_star+hh-1, ] = PI_hat %*% Y_delta_nn[t_star+hh-2 ,] + U_delta[hh, ] 
           
           Y_nn[t_star+hh-1, ] = PI_hat %*% Y_nn[t_star+hh-2 ,] + U[hh, ] 
-        }
+         
           I_delta [hh , ]  = Y_delta_nn[t_star+hh -1, ] - Y_nn[t_star+hh -1, ] 
       }
       I_delta_nn [,,nn] = I_delta
