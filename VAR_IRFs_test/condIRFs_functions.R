@@ -74,6 +74,18 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
               }
             }
             
+            if (flag_resit == 4){
+            #  Algo 2 with oracles on the structure
+            
+                options=gpOptions("ftc")
+                options$kern$comp=list("rbf","white")
+                
+                model_phi <- phi[[k]] 
+
+                  phi_hat<-gpOut(model_phi, as.matrix(aux_pa) )
+
+            }
+            
             U_delta[hh,k]  = phi_hat + E_delta_tilde[hh,k] 
 
             
@@ -109,6 +121,20 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
                 phi_hat = phi[[2]](aux_pa[1])#+ phi[[3]](aux_pa[2])
               }
             }
+            
+            if (flag_resit == 4){
+              #  Algo 2 with oracles on the structure
+              
+              options=gpOptions("ftc")
+              options$kern$comp=list("rbf","white")
+              
+              model_phi <- phi[[k]] 
+              
+              phi_hat<-gpOut(model_phi, as.matrix(aux_pa) )
+              
+            }
+            
+            
             # phi_hat <- gpOut(model_phi,as.matrix(aux_pa))
             U [hh,k] = phi_hat + E_tilde[hh,k] 
 
@@ -162,16 +188,20 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
   return( list(AVG = I_delta_nn_avg, LWR = I_delta_nn_lwr, UPR = I_delta_nn_up  ) )
 }
 
-get_structural_shocks_RESIT <- function(residual){
+get_structural_shocks_RESIT <- function(residual, flag_oracle = 0, oracle = NULL ){
   auxY = residual
   N = ncol(auxY)
   aux_graph = matrix(0,N,N)
   
+  if (flag_oracle ==0 ){
   graph_resit <- ICML(as.matrix(auxY), alpha = 0.05, model = "GP", parsModel = list(), 
                       indtest = dhsic.test, 
                       parsIndtest = list(method = "ExactFastTrace"), 
                       confounder_check = 0, output = FALSE)
   aux_graph=aux_graph+graph_resit
+  }else{
+    aux_graph = oracle
+  }
   
   shocks = auxY
   parents = aux_graph
@@ -200,3 +230,5 @@ get_structural_shocks_RESIT <- function(residual){
   
   return(list(Structural_shocks = shocks, phi = model_np, parents = parents))
 }
+
+

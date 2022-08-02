@@ -12,11 +12,17 @@ parents_resit_across_all = array(0, dim = c(3,3,length(a),length(TT)))
 
 MSE_resit = matrix(0,length(a),length(TT))
 MSE_sr = matrix(0,length(a),length(TT))
+MSE_resit_orcl = MSE_resit
 
 SE_resit = MSE_resit
 SE_sr = MSE_sr
+SE_resit_orcl = MSE_resit
 
 TEST_diff_IRFs = list(list(1,2,3),list(1,2,3),list(1,2,3))  # t-test of mse of irfs1->2 1->3 on the first 5 points
+TEST_diff_IRFs_orcl_sr = list(list(1,2,3),list(1,2,3),list(1,2,3))  # t-test of mse of irfs1->2 1->3 on the first 5 points
+TEST_diff_IRFs_orcl_resit = list(list(1,2,3),list(1,2,3),list(1,2,3))  # t-test of mse of irfs1->2 1->3 on the first 5 points
+
+
 
 names(TEST_diff_IRFs) = c(a[1],a[2],a[3])
 for (ii in 1:length(a)){
@@ -27,7 +33,7 @@ for (iT in 1:length(TT)){
 for (ia in 1:length(a) ){
   aa  = a[ia]
   N=3
-  Nsim= 200
+  Nsim= 10
   T=TT[iT]  
   T_horizon = 20
   t_star = 2

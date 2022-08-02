@@ -31,7 +31,7 @@ count=matrix(0,nrow = 3,ncol=3)
 irf_true_boot  = array(0,dim= c(T_horizon-t_star+1,N,N,Nsim) )
 irf_RESIT_boot = irf_true_boot
 irf_sr_boot = irf_true_boot
-
+irf_RESIT_oracle = irf_sr_boot
 
 
 parents_resit_all = diag(N)*0
@@ -97,12 +97,28 @@ True_IRFs = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = k_star,
                           flag_resit = 3, q_alfa = 0.68)
 
 
+ 
+
 C_IRFS_resit = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = k_star, 
                           delta = delta , Nsim = 100,
                           Omega = Y[1:(t_star-1),], E = E_resit,
                           PI_hat = out_var$hat_PI_1,
                           phi = phi_resit, Pa = parents_resit , 
                           flag_resit = 1, q_alfa = 0.68)
+
+
+out_shocks_oracle = get_structural_shocks_RESIT(out_var$residuals,flag_oracle = 1,oracle = true_parents)
+
+E_oracle = out_shocks_oracle$Structural_shocks
+phi_resit_oracle = out_shocks_oracle$phi 
+
+
+C_IRFS_true_oracle = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = k_star, 
+                                delta = delta , Nsim = 100,
+                                Omega = Y[1:(t_star-1),], E = E_oracle,
+                                PI_hat = out_var$hat_PI_1,
+                                phi = phi_resit_oracle, Pa = true_parents , 
+                                flag_resit = 4, q_alfa = 0.68)
 
 #S = t(chol(cov(out_var$residuals)))
 #Sigma_u<-cov(ures) ## this is not a consistent estimator! t( t(x)-colMeans(x) )
@@ -123,31 +139,13 @@ Chol_IRFs = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = k_star,
                        phi = phi, Pa = parents_SR , 
                        flag_resit = 2, q_alfa = 0.68, S = S)
 
-# plot.ts(C_IRFS_resit$AVG[t_star:H,2],type="l")
-#   lines(C_IRFS_resit$LWR[2:H,2], col="2")
-#       lines(C_IRFS_resit$UPR[2:H,2], col = "2")
-#       
-#       plot.ts(True_IRFs$AVG[t_star:H,2],type="l")
-#       lines(True_IRFs$LWR[2:H,2], col="2")
-#       lines(True_IRFs$UPR[2:H,2], col = "2")
-#       
-#       plot.ts(Chol_IRFs$AVG[t_star:H,2],type="l")
-#       lines(Chol_IRFs$LWR[2:H,2], col="2")
-#       lines(Chol_IRFs$UPR[2:H,2], col = "2")
-#       
-#       plot.ts(True_IRFs$AVG[t_star:H,3],type="l")
-#       lines(C_IRFS_resit$AVG[2:H,3], col="2")
-#       lines(Chol_IRFs$AVG[2:H,3], col = "3")
-#       
-#       plot.ts(True_IRFs$AVG[t_star:H,2],type="l")
-#       lines(C_IRFS_resit$AVG[2:H,2], col="2")
-#       lines(Chol_IRFs$AVG[2:H,2], col = "3")
-      
+ 
  
  
 irf_true_boot[,,k_star,nn] = True_IRFs$AVG[t_star:H,]
 irf_RESIT_boot[,,k_star,nn] = C_IRFS_resit$AVG[t_star:H,]
 irf_sr_boot[,,k_star,nn] = Chol_IRFs$AVG[t_star:H,]
+irf_RESIT_oracle[,,k_star,nn] = C_IRFS_true_oracle$AVG[t_star:H,]
    }
 
 
@@ -165,17 +163,21 @@ irf_true = True_IRFs$AVG[t_star:H,]
 irf_RESIT_avg = irf_true*0;
 irf_sr_avg = irf_true*0;
 irf_true_avg = irf_true*0;
+irf_RESIT_orcl_avg =irf_true*0
 
 irf_RESIT_upper =irf_true*0;
 irf_RESIT_lower = irf_true*0;
 irf_sr_upper =  irf_true*0;
 irf_sr_lower =  irf_true*0;
+irf_RESIT_orcl_upper = irf_true*0;
+  irf_RESIT_orcl_lower= irf_true*0;
 
 for (ii in k_star){
   irf_RESIT_avg  = rowMeans(irf_RESIT_boot[,,ii,],dims = 2)
   irf_sr_avg  = rowMeans(irf_sr_boot[,,ii,],dims=2)
   irf_true_avg  = rowMeans(irf_true_boot[,,ii,],dims = 2)
-  
+  irf_RESIT_orcl_avg = rowMeans(irf_RESIT_oracle[,,ii,],dims = 2)
+    
   #CI of 1 shocks
   for (jj in 1:3){
   irf_RESIT_upper[,jj] = apply(irf_RESIT_boot[,jj,1,],1 , 
@@ -189,6 +191,12 @@ for (ii in k_star){
   
   irf_sr_lower[,jj] = apply(irf_sr_boot[,jj,1,],1 , 
                               quantile , probs = c(1-0.68)  )
+  
+  irf_RESIT_orcl_upper[,jj] =   apply(irf_RESIT_oracle[,jj,1,],1 , 
+                                      quantile , probs = c(0.68)  )
+
+  irf_RESIT_orcl_lower[,jj] = apply(irf_RESIT_oracle[,jj,1,],1 , 
+                                   quantile , probs = c(1-0.68)  )
   }
 }
 
@@ -212,6 +220,13 @@ write.csv(cbind(irf_sr_avg[,3],irf_sr_lower[,3],
                 irf_sr_upper[,3]),file = paste("IRF_3_LIN_sim",aux_s ))
 
 write.csv(cbind(irf_true[,3]),file = paste("IRF_3_true_sim",aux_s ))
+
+
+write.csv(cbind(irf_RESIT_orcl_avg[,2],irf_RESIT_orcl_lower[,2],
+                irf_RESIT_orcl_upper[,2]),file = paste("IRF_2_orcl_sim",aux_s ))
+
+write.csv(cbind(irf_RESIT_orcl_avg[,3],irf_RESIT_orcl_lower[,3],
+                irf_RESIT_orcl_upper[,3]),file = paste("IRF_3_orcl_sim",aux_s ))
 
 }
 source("testing_irfs.R")
