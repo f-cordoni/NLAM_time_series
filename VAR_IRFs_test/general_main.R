@@ -52,8 +52,8 @@ MEAN_RESIT_parents = array(0,dim =c(3,3,3))
 SE_RESIT_parents =array(0,dim =c(3,3,3))
 for ( ii in 1:3){
   for(jj in 1:3){
-    MEAN_RESIT_parents[ii,jj,]  = apply(parents_resit_across_all[ii,jj,,],MARGIN = 2,mean)
-    SE_RESIT_parents[ii,jj,] =  apply(parents_resit_across_all[ii,jj,,],
+    MEAN_RESIT_parents[ii,jj,]  = apply(parents_resit_across_all[ii,jj,,]/2,MARGIN = 2,mean)
+    SE_RESIT_parents[ii,jj,] =  apply(parents_resit_across_all[ii,jj,,]/2,
                                      MARGIN = 2,sd)/sqrt(3)
   }
   }
