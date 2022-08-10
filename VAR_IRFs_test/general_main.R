@@ -33,7 +33,7 @@ for (iT in 1:length(TT)){
 for (ia in 1:length(a) ){
   aa  = a[ia]
   N=3
-  Nsim= 10
+  Nsim= 200
   T=TT[iT]  
   T_horizon = 20
   t_star = 2
@@ -42,6 +42,7 @@ for (ia in 1:length(a) ){
   delta = 1
   
 source("comparison_irfs.R")
+  print(c(ia,iT))
   parents_SR_across_all[,,ia,iT] =  parents_SR_all
   parents_resit_across_all[,,ia,iT] = parents_resit_all
 }

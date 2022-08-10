@@ -1,4 +1,5 @@
 
+setwd("~/Dropbox/post-doc/non-linearity/code/simulations_comparison/VAR_IRFs_test")
 
 flag_irf_plots =0
 

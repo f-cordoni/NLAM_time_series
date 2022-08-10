@@ -107,7 +107,8 @@ C_IRFS_resit = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = k_star,
                           flag_resit = 1, q_alfa = 0.68)
 
 
-out_shocks_oracle = get_structural_shocks_RESIT(out_var$residuals,flag_oracle = 1,oracle = true_parents)
+out_shocks_oracle = get_structural_shocks_RESIT(out_var$residuals,flag_oracle = 1,
+                                                oracle = true_parents)
 
 E_oracle = out_shocks_oracle$Structural_shocks
 phi_resit_oracle = out_shocks_oracle$phi 
@@ -128,8 +129,14 @@ Lag = 1
 Sigma_u<-(t(ures)%*%ures) / (nrow(ures)-1-ncol(ures)*Lag) ## denominator: (T - kp -1). This is a consistent estimator
 S<-t(chol(Sigma_u)) 
 
+# S = (I+H0 D^{-1}) D
+ D = diag(diag(S))
+ S_scaled = S%*% solve(D)
+ 
+
+
 parents_SR = t(S!=0)*1-diag(N)
-S_shocks_chol = t( solve(S) %*% t(out_var$residuals))
+S_shocks_chol = t( solve(S_scaled) %*% t(out_var$residuals))
 
 parents_SR_all =  parents_SR_all + parents_SR
 Chol_IRFs = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = k_star, 
@@ -137,7 +144,7 @@ Chol_IRFs = Cond_IRFS (t_star = t_star , H = T_horizon , k_star = k_star,
                        Omega = Y[1:(t_star-1),], E = S_shocks_chol,
                        PI_hat = out_var$hat_PI_1,
                        phi = phi, Pa = parents_SR , 
-                       flag_resit = 2, q_alfa = 0.68, S = S)
+                       flag_resit = 2, q_alfa = 0.68, S = S_scaled)
 
  
  

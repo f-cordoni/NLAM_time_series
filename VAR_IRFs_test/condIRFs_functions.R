@@ -56,7 +56,7 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
             if (flag_resit == 2){
               #Choleski
               iC = solve(S)
-              D = diag(diag(iC))
+              D = diag(diag(iC)) # D with the scaled S is the identity
               B0 = D - iC # iC = D- B_0
               
                  
@@ -105,7 +105,7 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
               # phi_hat  = S[k,] %*% U[hh,]
               
               iC = solve(S)
-              D = diag(diag(iC))
+              D = diag(diag(iC))#  D with the scaled S is the identity
               B0 = D - iC # iC = D- B_0
               
           
@@ -140,18 +140,18 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
 
           }
           
-          if (flag_resit == 2){
-            #scaling for Choleski
-            iC = solve(S)
-            D = diag(diag(iC))
-            B0 = D - iC # iC = D- B_0
-            
-            iD = solve(D)
-            
-            U_delta[hh,k ] = iD[k,k] * U_delta[hh,k ]
-            
-            U [hh,k]  = iD[k,k] * U [hh,k] 
-          }
+          # if (flag_resit == 2){
+          #   #scaling for Choleski
+          #   iC = solve(S)
+          #   D = diag(diag(iC))
+          #   B0 = D - iC # iC = D- B_0
+          #   
+          #   iD = solve(D)
+          #   
+          #   U_delta[hh,k ] = iD[k,k] * U_delta[hh,k ]
+          #   
+          #   U [hh,k]  = iD[k,k] * U [hh,k] 
+          # }
  
         }
            #difference
