@@ -1,6 +1,6 @@
 Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
                      Omega, E, PI_hat, phi, Pa , flag_resit = 1,
-                     q_alfa = 0.68, S = diag(ncol(E) ) ){
+                     q_alfa = 0.68, S = diag(ncol(E) ), lag = 0 ){
    
     
     #phase 1
@@ -156,10 +156,32 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
         }
            #difference
 
+        if (lag == 0){
           Y_delta_nn[t_star+hh-1, ] = PI_hat %*% Y_delta_nn[t_star+hh-2 ,] + U_delta[hh, ] 
           
           Y_nn[t_star+hh-1, ] = PI_hat %*% Y_nn[t_star+hh-2 ,] + U[hh, ] 
-         
+        }else{
+          #if lag >1
+          ll= 1
+          aux_past_delta = PI_hat[[ll]] %*% Y_delta_nn[t_star+hh-ll-1 ,]
+          aux_past = PI_hat[[ll]] %*% Y_nn[t_star+hh-ll-1 ,]
+          if (lag >1){
+          for (ll in 2:lag){
+            
+          aux_past_delta = PI_hat[[ll]] %*% Y_delta_nn[t_star+hh-ll-1 ,]+aux_past_delta
+          
+          aux_past = PI_hat[[ll]] %*% Y_nn[t_star+hh-ll-1 ,]+aux_past
+          }
+          }
+          
+          aux_past_delta  = PI_hat[[lag+1]] +aux_past_delta
+          aux_past =  PI_hat[[lag+1]] +aux_past
+          
+          Y_delta_nn[t_star+hh-1, ] = aux_past_delta + U_delta[hh, ] 
+          
+          Y_nn[t_star+hh-1, ] = aux_past + U[hh, ] 
+          
+        } 
           I_delta [hh , ]  = Y_delta_nn[t_star+hh -1, ] - Y_nn[t_star+hh -1, ] 
       }
       I_delta_nn [,,nn] = I_delta
@@ -197,7 +219,8 @@ get_structural_shocks_RESIT <- function(residual, flag_oracle = 0, oracle = NULL
   graph_resit <- ICML(as.matrix(auxY), alpha = 0.05, model = "GP", parsModel = list(), 
                       indtest = dhsic.test, 
                       parsIndtest = list(method = "ExactFastTrace"), 
-                      confounder_check = 0, output = FALSE)
+                      confounder_check = 0, output = FALSE, flag_resit_part_2 = 0)
+
   aux_graph=aux_graph+graph_resit
   }else{
     aux_graph = oracle

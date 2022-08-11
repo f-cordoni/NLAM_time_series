@@ -111,7 +111,9 @@ fit_and_test_independence <- function(x,y,z,alpha,model,parsModel = list(),indte
 }
 
 
-ICML <- function(M, alpha = 0.05, model = train_linear, parsModel = list(), indtest = indtestHsic, parsIndtest = list(method = "ExactFastTrace"), confounder_check = 0, output = FALSE)
+ICML <- function(M, alpha = 0.05, model = train_linear, parsModel = list(), indtest = indtestHsic, 
+                 parsIndtest = list(method = "ExactFastTrace"), confounder_check = 0, 
+                 output = FALSE, flag_resit_part_2 = 1)
 {
     #M contains the data (each col one component)
     #confounder_check indicates subsets of which size the method tries to omit if it doesn't find any possible sink node
@@ -184,6 +186,7 @@ ICML <- function(M, alpha = 0.05, model = train_linear, parsModel = list(), indt
     }
     rm(S)
     #todo: here, we take the first possible parent away (not the best one). in theory it probably doesn't make a difference. experiments in paper done correctly. but maybe finding all dags is better.
+    if (flag_resit_part_2 == 1){
     for(d in 1:(p-1))
     {
         if(err[d] != 1)
@@ -258,6 +261,7 @@ ICML <- function(M, alpha = 0.05, model = train_linear, parsModel = list(), indt
             indtest_at_end[d] <- -1
         }
     }
+    
     if(max(indtest_at_end)<0)
     {
         if(output)
@@ -270,5 +274,15 @@ ICML <- function(M, alpha = 0.05, model = train_linear, parsModel = list(), indt
     {
         print(paste("final ind. test failed. No solution."))
         return(NULL)
+    }
+    }else{
+      #skip the pruning step 2 of RESIT
+      
+      C = matrix(0,p,p)
+      for(d in 1:(p-1)){
+        C[par[d,1:parlen[d]],variable[d]] = par[d,1:parlen[d]]
+      }
+      C  = (C!=0)*1
+      return(C)
     }
 }
