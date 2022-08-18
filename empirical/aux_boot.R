@@ -61,16 +61,16 @@ for (ii in k_star){
   #CI of 1 shocks
   for (jj in 1:3){
     irf_RESIT_upper[,jj] = apply(irf_RESIT_boot[,jj,k_star,],1 , 
-                                 quantile , probs = c(0.66)  )
+                                 quantile , probs = c(0.84)  )
     
     irf_RESIT_lower[,jj] = apply(irf_RESIT_boot[,jj,k_star,],1 , 
-                                 quantile , probs = c(1-0.66)  )
+                                 quantile , probs = c(1-0.84)  )
     
     irf_sr_upper[,jj] = apply(irf_sr_boot[,jj,k_star,],1 , 
-                              quantile , probs = c(0.66)  )
+                              quantile , probs = c(0.84)  )
     
     irf_sr_lower[,jj] = apply(irf_sr_boot[,jj,k_star,],1 , 
-                              quantile , probs = c(1-0.66)  )
+                              quantile , probs = c(1-0.84)  )
     
  
   }
@@ -78,8 +78,15 @@ for (ii in k_star){
 
 
 
- aux_min = min(c(irf_RESIT_lower[,1],irf_sr_lower[,1]))
- aux_max = max(c(irf_RESIT_upper[,1],irf_sr_upper[,1]))
+require(R.matlab)
+aux_s = sprintf("IRFs_delta=%s_kstar=%s.mat",sign(delta),k_star)
+writeMat(aux_s,irfs_boot = irf_sr_boot, irf_sr_avg = irf_sr_avg,
+         irf_RESIT_avg = irf_RESIT_avg, irf_RESIT_boot= irf_RESIT_boot
+         )
+
+
+aux_min = min(c(irf_RESIT_lower[,1],irf_sr_lower[,1]))
+aux_max = max(c(irf_RESIT_upper[,1],irf_sr_upper[,1]))
 plot.ts(irf_RESIT_avg[,1] ,ylim=c(aux_min,aux_max) )
 lines( irf_RESIT_upper[,1],col=2,lty=2)
 lines( irf_RESIT_lower[,1],col=2,lty=2)

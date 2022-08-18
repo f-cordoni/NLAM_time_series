@@ -22,6 +22,9 @@ set.seed(2021)
 source("../VAR_IRFs_test/RESIT.R", local = TRUE)
 
 source("../VAR_IRFs_test/condIRFs_functions.R",local = TRUE)
+
+
+
 out_shocks_resit = get_structural_shocks_RESIT(residual)
 
 
@@ -58,6 +61,8 @@ for (ii in 1:lag){
   
 }
 residual = (model_var$residuals)
+
+
 
 out_shocks_resit = get_structural_shocks_RESIT(residual,
                                                flag_oracle = 1, oracle = ORACLE[pi,pi])

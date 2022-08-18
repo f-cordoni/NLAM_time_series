@@ -1,6 +1,8 @@
 setwd("~/Dropbox/post-doc/non-linearity/code/simulations_comparison/empirical")
 
-flag_monthly = 1
+# data quarterly con GMR application without oil price exogenous
+
+flag_monthly = 0
 setwd("data/")
 flag_applicatin_fed_fund = 0
 source("data_pre_processing.R")
@@ -11,38 +13,45 @@ setwd("../")
 
 # variable selections 
 #DATA = DATA_TS[,c("RealGDP","Energy","Total_CO2_Emissions")]
-DATA = DATA_TS[,c("RealGDP","Energy","RealPE")] 
+DATA = DATA_TS 
 plot.ts(DATA)
 #demean the data
 scales = apply(DATA,2,sd)
 DATA = scale(DATA, center = FALSE, scale = FALSE)
-varnames = colnames(DATA)
+ varnames = c("infl","output","r")
+plot.ts(DATA)
 
+DATA = DATA[1:262,]
 source("main_empirical.R")
 
 source("aux_Resit:R.R")
 
+ 
 t_star = lag+1
 T_horizon =t_star+ 20
-k_star = 2
+k_star = 1
 H = T_horizon 
-delta = 100
+delta = 1
+ 
 
 source("g_irfs_for fixed_A.R")
 source("plot_irfs_empirical.R")
 
-delta =   -100
+delta =   -mean(DATA[,k_star])
 
 source("g_irfs_for fixed_A.R")
 source("plot_irfs_empirical.R")
 
-t_star = lag+1
-T_horizon =t_star+ 20
-k_star = 2
-H = T_horizon 
-delta = -100
+for (k_star in 1:3){
+  t_star = lag+1
+  T_horizon =t_star+ 20
+   
+  H = T_horizon 
+  delta = mean(DATA[,k_star])
 
-Nboot = 100
+ 
+
+Nboot = 200
 irf_RESIT_boot = array(0,dim= c(T_horizon-t_star+1,N,N,Nboot) )
 irf_sr_boot = irf_RESIT_boot
 flag_boot = 1
@@ -51,15 +60,16 @@ if (flag_boot == 1){
   source("aux_boot.R")
 }
 
-delta = 100
+delta = -mean(DATA[,k_star])
 
 
 irf_RESIT_boot = array(0,dim= c(T_horizon-t_star+1,N,N,Nboot) )
 irf_sr_boot = irf_RESIT_boot
 flag_boot = 1
-Nboot = 100
+ 
 if (flag_boot == 1){
   source("aux_boot.R")
+}
 }
 #questo è ok asimmetria dello shock
 ###################################################################
@@ -94,7 +104,7 @@ delta = 1
 source("g_irfs_for fixed_A.R")
 source("plot_irfs_empirical.R")
 
-delta =   -1
+delta =   -100
 
 
 source("g_irfs_for fixed_A.R")

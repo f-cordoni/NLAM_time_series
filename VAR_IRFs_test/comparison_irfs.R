@@ -188,22 +188,22 @@ for (ii in k_star){
   #CI of 1 shocks
   for (jj in 1:3){
   irf_RESIT_upper[,jj] = apply(irf_RESIT_boot[,jj,1,],1 , 
-                                 quantile , probs = c(0.66)  )
+                                 quantile , probs = c(0.84)  )
   
   irf_RESIT_lower[,jj] = apply(irf_RESIT_boot[,jj,1,],1 , 
-                                 quantile , probs = c(1-0.66)  )
+                                 quantile , probs = c(1-0.84)  )
   
   irf_sr_upper[,jj] = apply(irf_sr_boot[,jj,1,],1 , 
-                              quantile , probs = c(0.66)  )
+                              quantile , probs = c(0.84)  )
   
   irf_sr_lower[,jj] = apply(irf_sr_boot[,jj,1,],1 , 
-                              quantile , probs = c(1-0.66)  )
+                              quantile , probs = c(1-0.84)  )
   
   irf_RESIT_orcl_upper[,jj] =   apply(irf_RESIT_oracle[,jj,1,],1 , 
-                                      quantile , probs = c(0.66)  )
+                                      quantile , probs = c(0.84)  )
 
   irf_RESIT_orcl_lower[,jj] = apply(irf_RESIT_oracle[,jj,1,],1 , 
-                                   quantile , probs = c(1-0.66)  )
+                                   quantile , probs = c(1-0.84)  )
   }
 }
 
