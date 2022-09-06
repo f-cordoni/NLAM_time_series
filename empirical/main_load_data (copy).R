@@ -2,8 +2,8 @@ setwd("~/Dropbox/post-doc/non-linearity/code/simulations_comparison/empirical")
 
 # data quarterly con GMR application without oil price exogenous
 
-flag_monthly = 0
-setwd("data/")
+flag_monthly = 1
+setwd("data (copy)/")
 flag_applicatin_fed_fund = 0
 source("data_pre_processing.R")
 setwd("../")
@@ -19,7 +19,7 @@ plot.ts(DATA)
 scales = apply(DATA,2,sd)
 DATA = scale(DATA, center = FALSE, scale = FALSE)
 varnames = colnames(DATA)
-plot.ts(DATA)
+plot.ts(DATA,main = "")
 source("main_empirical.R")
 
 source("aux_Resit:R.R")

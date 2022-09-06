@@ -56,11 +56,15 @@ for ia = 1:length(a)
         
         if (flag_oracle == 0)
             grid on
-            legend('IRF th.','IRF NL','IRF LIN')
+            if ii <=3
+                legend('IRF th.','IRF NL','IRF LIN')
+            end
             set(gca,'FontSize',20)
         else
             grid on
-            legend('IRF th.','IRF NL','IRF LIN','IRF ORCL')
+            if ii <=3
+                legend('IRF th.','IRF NL','IRF LIN','IRF ORCL')
+            end
             set(gca,'FontSize',20)
         end
         
@@ -115,12 +119,17 @@ for ia = 1:length(a)
         
         if (flag_oracle == 0)
             grid on
-            legend('IRF th.','IRF NL','IRF LIN')
+            if ii <=3
+                legend('IRF th.','IRF NL','IRF LIN')
+            end
             set(gca,'FontSize',20)
         else
             grid on
-            legend('IRF th.','IRF NL','IRF LIN','IRF ORCL')
+            if ii <=3
+                legend('IRF th.','IRF NL','IRF LIN','IRF ORCL')
+            end
             set(gca,'FontSize',20)
+            
         end
     end
 end

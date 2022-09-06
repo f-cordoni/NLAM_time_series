@@ -22,22 +22,25 @@ DATA = scale(DATA, center = FALSE, scale = FALSE)
 plot.ts(DATA)
 
 DATA = DATA[1:262,]
+#1953 Q3 : 2019 Q4
+ts( DATA[,1], start = c(1954,3),frequency = 4)
 source("main_empirical.R")
 
 source("aux_Resit:R.R")
 
- 
+#considerare shock policy monetary sulle altre due
+#shock con delta = 1 sd  ,, PRE_COVID
 t_star = lag+1
 T_horizon =t_star+ 20
 k_star = 1
 H = T_horizon 
-delta = 1
- 
+delta = sd(DATA[,k_star])
+
 
 source("g_irfs_for fixed_A.R")
 source("plot_irfs_empirical.R")
 
-delta =   -mean(DATA[,k_star])
+delta =   -sd(DATA[,k_star])
 
 source("g_irfs_for fixed_A.R")
 source("plot_irfs_empirical.R")
@@ -47,7 +50,9 @@ for (k_star in 1:3){
   T_horizon =t_star+ 20
    
   H = T_horizon 
-  delta = mean(DATA[,k_star])
+  
+  delta = sd(DATA[,k_star])
+ 
 
  
 
@@ -60,7 +65,10 @@ if (flag_boot == 1){
   source("aux_boot.R")
 }
 
-delta = -mean(DATA[,k_star])
+
+  delta = -sd(DATA[,k_star])
+
+
 
 
 irf_RESIT_boot = array(0,dim= c(T_horizon-t_star+1,N,N,Nboot) )
@@ -72,64 +80,64 @@ if (flag_boot == 1){
 }
 }
 #questo è ok asimmetria dello shock
-###################################################################
-setwd("~/Dropbox/post-doc/non-linearity/code/simulations_comparison/empirical")
-setwd("data/")
-flag_applicatin_fed_fund = 1
-flag_monthly = 1
-source("data_pre_processing.R")
-setwd("../")
-
-DATA = DATA_TS[,c("RealGDP","PGDP","FEDFUNDS")] 
-plot.ts(DATA)
-#demean the data
-scales = apply(DATA,2,sd)
-DATA = scale(DATA, center = FALSE, scale = FALSE)
-plot.ts(DATA)
-
-varnames = colnames(DATA)
-source("main_empirical.R")
- 
-
-
-source("aux_Resit:R.R")
-
-
-t_star = lag+1
-T_horizon =t_star+ 20
-k_star = 1
-H = T_horizon 
-delta = 1
-
-source("g_irfs_for fixed_A.R")
-source("plot_irfs_empirical.R")
-
-delta =   -100
-
-
-source("g_irfs_for fixed_A.R")
-source("plot_irfs_empirical.R")
-
-Nboot = 100
-
-t_star = lag+1
-T_horizon =t_star+ 20
-k_star = 1
-H = T_horizon 
-delta = 1
-
-irf_RESIT_boot = array(0,dim= c(T_horizon-t_star+1,N,N,Nboot) )
-irf_sr_boot = irf_RESIT_boot
-flag_boot = 1
-if (flag_boot == 1){
-  source("aux_boot.R")
-}
-
-delta = -1
-
-irf_RESIT_boot = array(0,dim= c(T_horizon-t_star+1,N,N,Nboot) )
-irf_sr_boot = irf_RESIT_boot
-flag_boot = 1
-if (flag_boot == 1){
-  source("aux_boot.R")
-}
+# ###################################################################
+# setwd("~/Dropbox/post-doc/non-linearity/code/simulations_comparison/empirical")
+# setwd("data/")
+# flag_applicatin_fed_fund = 1
+# flag_monthly = 1
+# source("data_pre_processing.R")
+# setwd("../")
+# 
+# DATA = DATA_TS[,c("RealGDP","PGDP","FEDFUNDS")] 
+# plot.ts(DATA)
+# #demean the data
+# scales = apply(DATA,2,sd)
+# DATA = scale(DATA, center = FALSE, scale = FALSE)
+# plot.ts(DATA)
+# 
+# varnames = colnames(DATA)
+# source("main_empirical.R")
+#  
+# 
+# 
+# source("aux_Resit:R.R")
+# 
+# 
+# t_star = lag+1
+# T_horizon =t_star+ 20
+# k_star = 1
+# H = T_horizon 
+# delta = 1
+# 
+# source("g_irfs_for fixed_A.R")
+# source("plot_irfs_empirical.R")
+# 
+# delta =   -100
+# 
+# 
+# source("g_irfs_for fixed_A.R")
+# source("plot_irfs_empirical.R")
+# 
+# Nboot = 100
+# 
+# t_star = lag+1
+# T_horizon =t_star+ 20
+# k_star = 1
+# H = T_horizon 
+# delta = 1
+# 
+# irf_RESIT_boot = array(0,dim= c(T_horizon-t_star+1,N,N,Nboot) )
+# irf_sr_boot = irf_RESIT_boot
+# flag_boot = 1
+# if (flag_boot == 1){
+#   source("aux_boot.R")
+# }
+# 
+# delta = -1
+# 
+# irf_RESIT_boot = array(0,dim= c(T_horizon-t_star+1,N,N,Nboot) )
+# irf_sr_boot = irf_RESIT_boot
+# flag_boot = 1
+# if (flag_boot == 1){
+#   source("aux_boot.R")
+# }
