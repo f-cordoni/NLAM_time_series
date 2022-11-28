@@ -3,7 +3,7 @@ alfa = 0.75;
 delta_all = [-1,1];
 kstar_all = [1,2,3];
 t = 0:20;
-varnames = {'r','output','infl'};
+varnames = {'r','o','\pi'};
 for ikstar = 1:3
     for idelta = 1:2
         
@@ -26,6 +26,7 @@ for ikstar = 1:3
             plot(t,irf_LWR_resit(:,ii),'r--')
             title(sprintf('%s -> %s',varnames{kstar},varnames{ii}))
             plot(t,0*t,'k')
+            set(gca,'FontSize',20)
             
             subplot(3,2,3*(ii-1)-ii+2+1)
             irf_sr_avg = quantile(irfs_boot(:,:,kstar,:),0.5,4);
@@ -37,7 +38,7 @@ for ikstar = 1:3
             plot(t,irf_LWR_SR(:,ii),'b--')
             title(sprintf('%s -> %s',varnames{kstar},varnames{ii}))
             plot(t,0*t,'k')
-            
+            set(gca,'FontSize',20)
             
             
         end

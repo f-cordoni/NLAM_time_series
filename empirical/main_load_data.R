@@ -23,7 +23,10 @@ plot.ts(DATA)
 
 DATA = DATA[1:262,]
 #1953 Q3 : 2019 Q4
-ts( DATA[,1], start = c(1954,3),frequency = 4)
+aux_plot_data = ts( DATA , start = c(1954,3),frequency = 4)
+
+colnames(aux_plot_data) = c("infl.","output","r")
+plot.ts(aux_plot_data, main = "")
 source("main_empirical.R")
 
 source("aux_Resit:R.R")

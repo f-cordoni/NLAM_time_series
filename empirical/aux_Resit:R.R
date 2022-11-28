@@ -46,7 +46,8 @@ pi = t(as.matrix(topo_sort(graph.adjacency(ORACLE))))
   
 
 Y = DATA[,pi]
-#permute following the topological order 
+#permute following the topological order (permutation and RESIT refit made only for graphical purpose,
+#var 1 is 'r' , var 2 is 'o' and var 3 is 'pi')
 
 model_var = lineVar(Y,lag = lag,include = "const")
 model_var_true = model_var
