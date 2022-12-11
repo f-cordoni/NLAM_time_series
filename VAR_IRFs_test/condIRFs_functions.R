@@ -1,8 +1,11 @@
 Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
                      Omega, E, PI_hat, phi, Pa , flag_resit = 1,
-                     q_alfa = 0.68, S = diag(ncol(E) ), lag = 0 ){
-   
-    
+                     q_alfa = 0.84, S = diag(ncol(E) ), lag = 0, flag_causal_structure = NULL ){
+   #flag_resit  = 1; estiamte the CIRFs using algo 2 with RESIT
+  #               2 estimate CIRFs using Cholesky (linear)
+  #               3 true CIRFS, depend on the  causal structure
+  #               4 CIRFs with oracle on the causal structure( TRUE DAG or TRUE topological order)
+  #  4 and 1 are the same (i.e. non linear regression)
     #phase 1
     I_delta_nn = array(0,dim = c(H+1,ncol(E),Nsim))
     for (nn in 1:Nsim){
@@ -14,7 +17,7 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
       E_tilde = matrix(0,H+1,ncol(E))
       for (i_col in 1:ncol(E)){
       ix_sample = sample(1:nrow(E),H+1, replace = TRUE)
-      # non per row?
+      #  
       E_tilde[,i_col] = E[ix_sample,i_col]
        
       }
@@ -66,12 +69,40 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
             
             if (flag_resit == 3){
               # true CIRFS
-              if (k ==2){
-                phi_hat = phi[[1]](aux_pa)
-              }
-              if (k ==3){
-                phi_hat = phi[[2]](aux_pa[1])#+ phi[[3]](aux_pa[2])
-              }
+              
+              switch(flag_causal_structure,
+                     chain={
+                       # 1->2->3
+                       if (k ==2){
+                         phi_hat = phi[[1]](aux_pa)
+                       }
+                       if (k ==3){
+                         phi_hat = phi[[2]](aux_pa)#+ phi[[3]](aux_pa[2])
+                       }
+                       # print("chain")
+                     },
+                     common_cause={
+                       # 1->2;   1->3
+                       
+                       
+                       if (k ==2){
+                         phi_hat = phi[[1]](aux_pa)
+                       }
+                       if (k ==3){
+                         phi_hat = phi[[2]](aux_pa) 
+                       }
+                       # print("common-cause")
+                     },
+                     v_structure={
+                       # 1->3; 2->3
+                      
+                       if (k ==3){
+                         phi_hat = phi[[1]](aux_pa[1])+ phi[[2]](aux_pa[2]) 
+                       }
+                       # print("v-structure")
+                     })
+              
+
             }
             
             if (flag_resit == 4){
@@ -81,9 +112,13 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
                 options$kern$comp=list("rbf","white")
                 
                 model_phi <- phi[[k]] 
-
+                
+                if (length(i_parents)>1){
+                  phi_hat<-gpOut(model_phi, t(as.matrix(aux_pa))  )
+                }else{
                   phi_hat<-gpOut(model_phi, as.matrix(aux_pa) )
-
+                }
+ 
             }
             
             U_delta[hh,k]  = phi_hat + E_delta_tilde[hh,k] 
@@ -114,12 +149,37 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
             
             if (flag_resit == 3){
               # true CIRFS
-              if (k ==2){
-                phi_hat = phi[[1]](aux_pa)
-              }
-              if (k ==3){
-                phi_hat = phi[[2]](aux_pa[1])#+ phi[[3]](aux_pa[2])
-              }
+              switch(flag_causal_structure,
+                     chain={
+                       # 1->2->3
+                       if (k ==2){
+                         phi_hat = phi[[1]](aux_pa)
+                       }
+                       if (k ==3){
+                         phi_hat = phi[[2]](aux_pa)#+ phi[[3]](aux_pa[2])
+                       }
+                       # print("chain")
+                     },
+                     common_cause={
+                       # 1->2;   1->3
+                       
+                       
+                       if (k ==2){
+                         phi_hat = phi[[1]](aux_pa)
+                       }
+                       if (k ==3){
+                         phi_hat = phi[[2]](aux_pa) 
+                       }
+                       # print("common-cause")
+                     },
+                     v_structure={
+                       # 1->3; 2->3
+                       
+                       if (k ==3){
+                         phi_hat = phi[[1]](aux_pa[1])+ phi[[2]](aux_pa[2]) 
+                       }
+                       # print("v-structure")
+                     })
             }
             
             if (flag_resit == 4){
@@ -129,9 +189,11 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
               options$kern$comp=list("rbf","white")
               
               model_phi <- phi[[k]] 
-              
-              phi_hat<-gpOut(model_phi, as.matrix(aux_pa) )
-              
+              if (length(i_parents)>1){
+                phi_hat<-gpOut(model_phi, t(as.matrix(aux_pa))  )
+              }else{
+                phi_hat<-gpOut(model_phi, as.matrix(aux_pa) )
+              } 
             }
             
             
@@ -210,7 +272,7 @@ Cond_IRFS <-function(t_star , H , k_star, delta, Nsim,
   return( list(AVG = I_delta_nn_avg, LWR = I_delta_nn_lwr, UPR = I_delta_nn_up  ) )
 }
 
-get_structural_shocks_RESIT <- function(residual, flag_oracle = 0, oracle = NULL ){
+get_structural_shocks_RESIT <- function(residual, flag_oracle = 0, oracle = NULL ,flag_resit_part_2 = 0){
   auxY = residual
   N = ncol(auxY)
   aux_graph = matrix(0,N,N)
@@ -219,12 +281,19 @@ get_structural_shocks_RESIT <- function(residual, flag_oracle = 0, oracle = NULL
   graph_resit <- ICML(as.matrix(auxY), alpha = 0.05, model = "GP", parsModel = list(), 
                       indtest = dhsic.test, 
                       parsIndtest = list(method = "ExactFastTrace"), 
-                      confounder_check = 0, output = FALSE, flag_resit_part_2 = 0)
+                      confounder_check = 0, output = FALSE, flag_resit_part_2 = flag_resit_part_2 )
+  #store the topological  order
+ 
+  
 
-  aux_graph=aux_graph+graph_resit
+  aux_graph=aux_graph+graph_resit 
   }else{
+    # get structural shocks with the the TRUE DAG or the DAG inferred by the true topological order
     aux_graph = oracle
   }
+  
+  require(gRbase)
+  topo_order = topo_sortMAT(aux_graph, index = TRUE)
   
   shocks = auxY
   parents = aux_graph
@@ -251,7 +320,32 @@ get_structural_shocks_RESIT <- function(residual, flag_oracle = 0, oracle = NULL
   
    
   
-  return(list(Structural_shocks = shocks, phi = model_np, parents = parents))
+  return(list(Structural_shocks = shocks, phi = model_np, parents = parents, topological_order = topo_order))
+}
+
+
+check_true_topological_order<-function(topological_order,flag_causal_structure){
+  # check if the topological_order is equal to one of the true topological order
+  flag = 0
+  if(flag_causal_structure == "chain"){
+    # 1->2->3
+    if ( all(topological_order == c(1,2,3))  ){
+      flag = 1
+    }
+  }
+  if(flag_causal_structure == "common-cause"){
+    # 1->2;  1->3
+    if ( all(topological_order == c(1,2,3)) || all(topological_order == c(1,3,2)) ){
+      flag = 1
+    }
+  }
+  if(flag_causal_structure == "v-structure"){
+    # 1-> 3;  2->3
+    if ( all(topological_order == c(1,2,3)) || all(topological_order == c(2,1,3)) ){
+      flag = 1
+    }
+  }
+  return(flag)
 }
 
 

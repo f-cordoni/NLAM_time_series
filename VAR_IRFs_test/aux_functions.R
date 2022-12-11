@@ -1,6 +1,7 @@
 
 generate_time_series <- function(N = 3,    T = 250 , sigma = 0.1,
-                                 PI_1, f12, f13){
+                                 PI_1, f12, f13, f23 ,
+                                 flag_causal_structure ){
   
 
   
@@ -13,9 +14,30 @@ generate_time_series <- function(N = 3,    T = 250 , sigma = 0.1,
     #the contemporaneous effect are computed separately from Y ( in order to make less confusion due co-founder)
     for (tt in 2:T){
       
-      u[tt,1]=eps[tt,1];
-      u[tt,2]=eps[tt,2]+f12(u[tt,1])
-      u[tt,3]=eps[tt,3]+f13(u[tt,1])#+f23(u[tt,2])
+      switch(flag_causal_structure,
+             chain={
+               # 1->2->3
+               u[tt,1]=eps[tt,1];
+               u[tt,2]=eps[tt,2]+f12(u[tt,1])
+               u[tt,3]=eps[tt,3]+f23(u[tt,2]) 
+               # print("chain")
+             },
+             common_cause={
+               # 1->2;   1->3
+               u[tt,1]=eps[tt,1];
+               u[tt,2]=eps[tt,2]+f12(u[tt,1])
+               u[tt,3]=eps[tt,3]+f13(u[tt,1])  
+               # print("common-cause")
+             },
+             v_structure={
+               # 1->3; 2->3
+               u[tt,1]=eps[tt,1];
+               u[tt,2]=eps[tt,2]
+               u[tt,3]=eps[tt,3]+f13(u[tt,1]) +f23(u[tt,2])
+               # print("v-structure")
+             })
+      
+  
       
       
       past=PI_1%*%Y[tt-1,]

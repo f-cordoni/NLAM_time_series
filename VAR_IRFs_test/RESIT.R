@@ -113,7 +113,7 @@ fit_and_test_independence <- function(x,y,z,alpha,model,parsModel = list(),indte
 
 ICML <- function(M, alpha = 0.05, model = train_linear, parsModel = list(), indtest = indtestHsic, 
                  parsIndtest = list(method = "ExactFastTrace"), confounder_check = 0, 
-                 output = FALSE, flag_resit_part_2 = 1)
+                 output = FALSE, flag_resit_part_2 = 0)
 {
     #M contains the data (each col one component)
     #confounder_check indicates subsets of which size the method tries to omit if it doesn't find any possible sink node
