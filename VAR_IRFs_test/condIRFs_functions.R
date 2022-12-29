@@ -333,13 +333,13 @@ check_true_topological_order<-function(topological_order,flag_causal_structure){
       flag = 1
     }
   }
-  if(flag_causal_structure == "common-cause"){
+  if(flag_causal_structure == "common_cause"){
     # 1->2;  1->3
     if ( all(topological_order == c(1,2,3)) || all(topological_order == c(1,3,2)) ){
       flag = 1
     }
   }
-  if(flag_causal_structure == "v-structure"){
+  if(flag_causal_structure == "v_structure"){
     # 1-> 3;  2->3
     if ( all(topological_order == c(1,2,3)) || all(topological_order == c(2,1,3)) ){
       flag = 1
