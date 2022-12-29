@@ -56,7 +56,7 @@ for (iT in 1:length(TT)){
 for (ia in 1:length(a) ){
   aa  = a[ia]
   N=3
-  Nsim= 10
+  Nsim= 200
   T=TT[iT]  
   T_horizon = 20
   t_star = 2
