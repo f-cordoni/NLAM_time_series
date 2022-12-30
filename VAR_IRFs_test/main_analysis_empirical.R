@@ -5,8 +5,10 @@
 # get the 
 load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_chain_kstar_1.RData")
 load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_chain_kstar_2.RData")
+
 load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_common_cause_kstar_1.RData")
 load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_common_cause_kstar_2.RData")
+
 load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_v_structure_kstar_1.RData")
 load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_v_structure_kstar_2.RData")
 

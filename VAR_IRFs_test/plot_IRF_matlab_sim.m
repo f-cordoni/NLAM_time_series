@@ -1,22 +1,27 @@
 clear all
 close all
-addpath('./../../../empirical/new_ACI_IP_CO2/_tbx/var_tbx')
-addpath('./../../../empirical/new_ACI_IP_CO2/_tbx/stvar_tbx')
-addpath('./../../../empirical/new_ACI_IP_CO2/_tbx/supportfct')
+addpath('./../../../../empirical/new_ACI_IP_CO2/_tbx/var_tbx')
+addpath('./../../../../empirical/new_ACI_IP_CO2/_tbx/stvar_tbx')
+addpath('./../../../../empirical/new_ACI_IP_CO2/_tbx/supportfct')
 
 a = [0.1 0.5 0.9]
 T = [250 500 1000]
 H = 10+1
 flag_oracle = 0;
 t = 0:(H-1);
+k_star = 1;
 
+causal_structure = {'chain','common_cause','v_structure'};
+flag_causal = 3;
+
+icausal = causal_structure{flag_causal};
 f= figure
 ii = 0;
 for ia = 1:length(a)
     for it = 1:length(T)
         
         aa = a(ia); TT = T(it);
-        file = sprintf(' _a=%g_T=%g.csv',aa,TT);
+        file = sprintf(' _a=%g_T=%g_%s_kstar_%g.csv',aa,TT,icausal,k_star);
         IRF_2_NL = csvread(strcat('IRF_2_NL_sim ',file),1,1);
         IRF_3_NL = csvread(strcat('IRF_3_NL_sim ',file),1,1);
         
@@ -27,8 +32,8 @@ for ia = 1:length(a)
         IRF_3_true = csvread(strcat('IRF_3_true_sim ',file),1,1);
         
         if (flag_oracle == 1)
-            IRF_2_orcl = csvread(strcat('IRF_2_orcl_sim',file),1,1);
-            IRF_3_orcl = csvread(strcat('IRF_3_orcl_sim ',file),1,1);
+            IRF_2_orcl = csvread(strcat('IRF_2_true_top_sim',file),1,1);
+            IRF_3_orcl = csvread(strcat('IRF_3_true_top_sim ',file),1,1);
             
         end
         
@@ -38,6 +43,9 @@ for ia = 1:length(a)
         plot(t,IRF_2_true(1:H),'k');
         xlim([0 H]);
         S = sprintf('1 -> 2, a = %g, T = %g', aa, TT);
+        if k_star == 2
+            S = sprintf('2 -> 2, a = %g, T = %g', aa, TT);
+        end
         title(S)
         
         plot(t,IRF_2_NL(1:H,1),'r');
@@ -70,7 +78,7 @@ for ia = 1:length(a)
         
     end
 end
-
+f.Position =  [50 50 1600 800]
 
 f= figure
 ii = 0;
@@ -78,7 +86,9 @@ for ia = 1:length(a)
     for it = 1:length(T)
         
         aa = a(ia); TT = T(it);
-        file = sprintf(' _a=%g_T=%g.csv',aa,TT);
+ 
+        file = sprintf(' _a=%g_T=%g_%s_kstar_%g.csv',aa,TT,icausal,k_star);
+        
         IRF_2_NL = csvread(strcat('IRF_2_NL_sim ',file),1,1);
         IRF_3_NL = csvread(strcat('IRF_3_NL_sim ',file),1,1);
         
@@ -89,8 +99,8 @@ for ia = 1:length(a)
         IRF_3_true = csvread(strcat('IRF_3_true_sim ',file),1,1);
         
         if (flag_oracle == 1)
-            IRF_2_orcl = csvread(strcat('IRF_2_orcl_sim',file),1,1);
-            IRF_3_orcl = csvread(strcat('IRF_3_orcl_sim ',file),1,1);
+            IRF_2_orcl = csvread(strcat('IRF_2_true_top_sim',file),1,1);
+            IRF_3_orcl = csvread(strcat('IRF_3_true_top_sim ',file),1,1);
             
         end
         
@@ -99,7 +109,11 @@ for ia = 1:length(a)
         hold on
         plot(t,IRF_3_true(1:H),'k');
         xlim([0 H])
+        
         S = sprintf('1 -> 3, a = %g, T = %g', aa, TT);
+        if k_star == 2
+            S = sprintf('2 -> 3, a = %g, T = %g', aa, TT);
+        end
         title(S)
         hold on
         plot(t,IRF_3_NL(1:H,1),'r');
@@ -134,7 +148,6 @@ for ia = 1:length(a)
     end
 end
 
-
-
+f.Position =  [50 50 1600 800]
 
 
