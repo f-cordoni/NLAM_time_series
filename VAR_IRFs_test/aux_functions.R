@@ -1,5 +1,5 @@
 
-generate_time_series <- function(N = 3,    T = 250 , sigma = 0.1,
+generate_time_series <- function(N = 3,    T = 250 , sigma = 1,
                                  PI_1, f12, f13, f23 ,
                                  flag_causal_structure ){
   

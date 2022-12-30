@@ -53,8 +53,8 @@ PI_1=aa*matrix(c(1,0,0,
           true_topo = c(1,2,3)
           
           if (flag_irf_plots == 1){
-            f12=function (x) x^2#1->2; 
-            f23=function (x) sin(x^2)#sqrt(abs(x))# 2 ->3
+            f12=function (x) sign(x)*x^2#1->2; 
+            f23=function (x) sin(sign(x)*x^2)#sqrt(abs(x))# 2 ->3
             #f23=function (x) sin(x^2)
           }else{
             
@@ -63,10 +63,10 @@ PI_1=aa*matrix(c(1,0,0,
             
             #  
             f12<-function(x, a = alfa){ 
-              aux = abs(x)^a 
+              aux = sign(x)*abs(x)^a 
               return(aux)}#1->2; 
             f23<-function (x, b = beta ){ 
-              aux = sin(abs(x)^b)
+              aux = sin(sign(x)*abs(x)^b)
               return(aux) }
           }
           # print("chain")
@@ -78,8 +78,8 @@ PI_1=aa*matrix(c(1,0,0,
                                   1,0,0),N,N)
           true_topo = c(1,2,3)
           if (flag_irf_plots == 1){
-            f12=function (x) x^2#1->2; 
-            f13=function (x) sin(x^2)#sqrt(abs(x))# 1 ->3
+            f12=function (x) sign(x)*x^2#1->2; 
+            f13=function (x) sin(sign(x)*x^2)#sqrt(abs(x))# 1 ->3
             #f23=function (x) sin(x^2)
           }else{
             
@@ -88,10 +88,10 @@ PI_1=aa*matrix(c(1,0,0,
             
             #  
             f12<-function(x, a = alfa){ 
-              aux = abs(x)^a 
+              aux = sign(x)*abs(x)^a 
               return(aux)}#1->2; 
             f13<-function (x, b = beta ){ 
-              aux = sin(abs(x)^b)
+              aux = sin(sign(x)*abs(x)^b)
               return(aux) }
           }
           
@@ -104,8 +104,8 @@ PI_1=aa*matrix(c(1,0,0,
                                   1,1,0),N,N)
           true_topo = c(1,2,3)
           if (flag_irf_plots == 1){
-            f13=function (x) x^2#1->3; 
-            f23=function (x) sin(x^2)#sqrt(abs(x))# 2 ->3
+            f13=function (x) sign(x)*x^2#1->3; 
+            f23=function (x) sin(sign(x)*x^2)#sqrt(abs(x))# 2 ->3
             #f23=function (x) sin(x^2)
           }else{
             
@@ -114,10 +114,10 @@ PI_1=aa*matrix(c(1,0,0,
             
             #  
             f13<-function(x, a = alfa){ 
-              aux = abs(x)^a 
+              aux = sign(x)*abs(x)^a 
               return(aux)}#1->2; 
             f23<-function (x, b = beta ){ 
-              aux = sin(abs(x)^b)
+              aux = sin(sign(x)*abs(x)^b)
               return(aux) }
           }
           # print("v-structure")
@@ -128,7 +128,7 @@ PI_1=aa*matrix(c(1,0,0,
 
  
 #generate time series
-Y_out = generate_time_series (N = 3,  T = T , sigma = 0.1,
+Y_out = generate_time_series (N = 3,  T = T , sigma = 1,
                                  PI_1  = PI_1, f12 = f12, f13  = f13, f23 = f23,
                               flag_causal_structure = flag_causal_structure)
 #estimate the VAR
