@@ -339,6 +339,8 @@ for (ii in k_star){
   }
 }
 
+irf_true = irf_true_avg 
+
 if (flag_irf_plots == 1){
 #source("irf_plots.R")
 # stampare plot a secondo dello schock

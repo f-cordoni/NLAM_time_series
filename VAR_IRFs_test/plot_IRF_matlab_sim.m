@@ -1,8 +1,8 @@
 clear all
 close all
-addpath('./../../../../empirical/new_ACI_IP_CO2/_tbx/var_tbx')
-addpath('./../../../../empirical/new_ACI_IP_CO2/_tbx/stvar_tbx')
-addpath('./../../../../empirical/new_ACI_IP_CO2/_tbx/supportfct')
+addpath('/home/fcordoni/Dropbox/post-doc/non-linearity/empirical/new_ACI_IP_CO2/_tbx/var_tbx')
+addpath('/home/fcordoni/Dropbox/post-doc/non-linearity/empirical/new_ACI_IP_CO2/_tbx/stvar_tbx')
+addpath('/home/fcordoni/Dropbox/post-doc/non-linearity/empirical/new_ACI_IP_CO2/_tbx/supportfct')
 
 a = [0.1 0.5 0.9]
 T = [250 500 1000]

@@ -1,5 +1,16 @@
 #setwd("~/Desktop/SIMULATIONS_RESIT/VAR_IRFs_test_to_send")
 
+
+# change the delta shock to 1
+# re-run the simulations with 
+# sigma = 1 / 0.1 
+# sign(x) and No-sign(x)
+
+###########
+# sigma2       1   0.1 
+# sign(x)     x     x
+# no-sign(x) (x)     x
+
 setwd("~/Dropbox/post-doc/non-linearity/code/simulations_comparison/VAR_IRFs_test")
 
 

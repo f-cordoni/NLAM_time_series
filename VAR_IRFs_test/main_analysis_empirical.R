@@ -3,14 +3,26 @@
 
 
 # get the 
-load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_chain_kstar_1.RData")
-load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_chain_kstar_2.RData")
+# load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_chain_kstar_1.RData")
+# load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_chain_kstar_2.RData")
+# 
+# load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_common_cause_kstar_1.RData")
+# load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_common_cause_kstar_2.RData")
+# 
+# load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_v_structure_kstar_1.RData")
+# load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_v_structure_kstar_2.RData")
 
-load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_common_cause_kstar_1.RData")
-load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_common_cause_kstar_2.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_1/200_sim_chain_kstar_1.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_1/200_sim_common_cause_kstar_1.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_1/200_sim_v_structure_kstar_1.RData")
 
-load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_v_structure_kstar_1.RData")
-load("~/Desktop/non_linear_IRF/SIMULATIONS/200_sim_v_structure_kstar_2.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_0.1/200_sim_chain_kstar_1.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_0.1/200_sim_common_cause_kstar_1.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_0.1/200_sim_v_structure_kstar_1.RData")
+
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_0.5/200_sim_chain_kstar_1.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_0.5/200_sim_common_cause_kstar_1.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_0.5/200_sim_v_structure_kstar_1.RData")
 
 # MSE on the variables 2 and 3
 require(xtable)
