@@ -1,4 +1,3 @@
-#MONTHLY
 
 require(openxlsx)
 

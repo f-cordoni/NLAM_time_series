@@ -20,9 +20,13 @@ load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_
 load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_0.1/200_sim_common_cause_kstar_1.RData")
 load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_0.1/200_sim_v_structure_kstar_1.RData")
 
-load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_0.5/200_sim_chain_kstar_1.RData")
-load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_0.5/200_sim_common_cause_kstar_1.RData")
-load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/sigma_0.5/200_sim_v_structure_kstar_1.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/no_sign_sigma_1/200_sim_chain_kstar_1.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/no_sign_sigma_1/200_sim_common_cause_kstar_1.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/no_sign_sigma_1/200_sim_v_structure_kstar_1.RData")
+
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/no_sign_sigma_0.1/200_sim_chain_kstar_1.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/no_sign_sigma_0.1/200_sim_common_cause_kstar_1.RData")
+load("/media/fcordoni/d8a1cc9c-6ed3-4913-92f0-f8c21492668f/non_linear_IRF/no_sign_sigma_0.1/200_sim_v_structure_kstar_1.RData")
 
 # MSE on the variables 2 and 3
 require(xtable)
@@ -32,13 +36,13 @@ require(xtable)
 for (ii in 1:3){
 print(round(c(MSE_sr[ii,],MSE_resit[ii,]),3))
 print(round(c(SE_sr[ii,],SE_resit[ii,]),3))
-print('-')
+print('')
 }
 
 for (ii in 1:3){
 print(round(c(MSE_true_dag[ii,],MSE_true_top[ii,]),3))
 print(round(c(SE_true_dag[ii,],SE_true_top[ii,]),3))
-print('-.....')
+print('')
 }
 
 

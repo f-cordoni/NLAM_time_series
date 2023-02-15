@@ -25,8 +25,15 @@ DATA = DATA[1:262,]
 #1953 Q3 : 2019 Q4
 aux_plot_data = ts( DATA , start = c(1954,3),frequency = 4)
 
-colnames(aux_plot_data) = c("infl.","output","r")
-plot.ts(aux_plot_data, main = "")
+# install.packages("latex2exp")
+library(latex2exp)
+ 
+colnames(aux_plot_data) = c("pi","o","r")
+plot.ts(aux_plot_data, main = "", ylabel= c(,"o","r"))
+par(mfrow=c(3,1), mai=c(0.4,0.65,0.4,0.2), cex.lab = 1.5)
+plot.ts(x = aux_plot_data[,1],ylab= TeX("$\\pi$"), main="", xlab="")
+plot.ts(x = aux_plot_data[,2],ylab= "o", main="", xlab="",  cex.lab = 2)
+plot.ts(x = aux_plot_data[,3],ylab= "r", main="",  xlab="",  cex.lab = 2)
 source("main_empirical.R")
 
 source("aux_Resit:R.R")

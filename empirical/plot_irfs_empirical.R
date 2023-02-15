@@ -4,7 +4,7 @@ plot.ts(C_IRFS_resit$AVG[t_star:H,1] ,ylim=c(min(C_IRFS_resit$LWR[,1]),
                                              max(C_IRFS_resit$UPR[,1])))
 lines( C_IRFS_resit$LWR[t_star:H,1],col=2,lty=2)
 lines( C_IRFS_resit$UPR[t_star:H,1],col=2,lty=2)
-title(main=paste(sprintf("IRF %s -> %s",varnames[pi[k_star]],varnames[pi[1]])  )   )
+title(main=paste(sprintf("IRF %s \rightarrow %s",varnames[pi[k_star]],varnames[pi[1]])  )   )
 plot.ts(Chol_IRFs$AVG[t_star:H,1],col=3,ylim=c(min(Chol_IRFs$LWR[,1]),
                                                max(Chol_IRFs$UPR[,1])))
 lines(Chol_IRFs$LWR[t_star:H,1],col=3,lty=2)

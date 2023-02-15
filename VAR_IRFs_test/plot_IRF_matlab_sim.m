@@ -5,7 +5,7 @@ addpath('/home/fcordoni/Dropbox/post-doc/non-linearity/empirical/new_ACI_IP_CO2/
 addpath('/home/fcordoni/Dropbox/post-doc/non-linearity/empirical/new_ACI_IP_CO2/_tbx/supportfct')
 
 a = [0.1 0.5 0.9]
-T = [250 500 1000]
+T = [250 1000]
 H = 10+1
 flag_oracle = 0;
 t = 0:(H-1);
@@ -38,15 +38,19 @@ for ia = 1:length(a)
         end
         
         ii = ii +1;
-        subplot(3,3,ii)
+        subplot(3,2,ii)
         hold on
         plot(t,IRF_2_true(1:H),'k');
         xlim([0 H]);
-        S = sprintf('1 -> 2, a = %g, T = %g', aa, TT);
-        if k_star == 2
-            S = sprintf('2 -> 2, a = %g, T = %g', aa, TT);
+        if ii ==1 || ii == 2
+            S = sprintf('1 \\rightarrow 2, T = %g', TT);
+            if k_star == 2
+                S = sprintf('2 \\rightarrow 2, T = %g', TT);
+            end
+             title(S)
         end
-        title(S)
+        
+        
         
         plot(t,IRF_2_NL(1:H,1),'r');
         plot(t,IRF_2_LIN(1:H,1),'b');
@@ -56,6 +60,10 @@ for ia = 1:length(a)
         plot(t,IRF_2_LIN(1:H,2),'b--');
         plot(t,IRF_2_LIN(1:H,3),'b--');
         
+        if ii <= 4
+           ylim([0 2]) 
+        end
+        
         if (flag_oracle == 1)
             plot(t,IRF_2_orcl(1:H,1),'g');
             plot(t,IRF_2_orcl(1:H,2),'g--');
@@ -64,8 +72,8 @@ for ia = 1:length(a)
         
         if (flag_oracle == 0)
             grid on
-            if ii <=3
-                legend('IRF th.','IRF NL','IRF LIN')
+            if ii == 2
+                legend('Theoretical','Nonlinear','Linear')
             end
             set(gca,'FontSize',20)
         else
@@ -76,9 +84,44 @@ for ia = 1:length(a)
             set(gca,'FontSize',20)
         end
         
+                if ii == 1 || ii == 2
+            ylim([-0.1 0.2])
+        end
+        
+        if ii == 3 || ii == 4
+            ylim([0 0.65])
+        end
+        
+        if ii == 5 || ii == 6
+            ylim([0 4])
+        end
+        
+        if ii == 1
+            ax = gca;
+            label_h =ylabel('a=0.1')
+        end
+        
+        if ii == 3
+            ax = gca;
+            label_h = ylabel('a=0.5')
+        end
+        
+        if ii == 5
+            ax = gca;
+            label_h = ylabel('a=0.9')
+            
+            
+        end
+        
+
+        
+        xlim([0,10])
+        
+        label_h.Position(1) = -1.5;
+        label_h.FontWeight= 'bold'
     end
 end
-f.Position =  [50 50 1600 800]
+f.Position =  [50 50 1600 1000]
 
 f= figure
 ii = 0;
@@ -86,7 +129,7 @@ for ia = 1:length(a)
     for it = 1:length(T)
         
         aa = a(ia); TT = T(it);
- 
+        
         file = sprintf(' _a=%g_T=%g_%s_kstar_%g.csv',aa,TT,icausal,k_star);
         
         IRF_2_NL = csvread(strcat('IRF_2_NL_sim ',file),1,1);
@@ -105,16 +148,20 @@ for ia = 1:length(a)
         end
         
         ii = ii +1;
-        subplot(3,3,ii)
+        subplot(3,2,ii)
         hold on
         plot(t,IRF_3_true(1:H),'k');
         xlim([0 H])
         
-        S = sprintf('1 -> 3, a = %g, T = %g', aa, TT);
-        if k_star == 2
-            S = sprintf('2 -> 3, a = %g, T = %g', aa, TT);
+        if ii ==1 || ii == 2
+            S = sprintf('1 \\rightarrow 3, T = %g', TT);
+            if k_star == 2
+                S = sprintf('2 \\rightarrow 3, T = %g', TT);
+            end
+             title(S)
         end
-        title(S)
+        
+       
         hold on
         plot(t,IRF_3_NL(1:H,1),'r');
         plot(t,IRF_3_LIN(1:H,1),'b');
@@ -130,11 +177,24 @@ for ia = 1:length(a)
             plot(t,IRF_3_orcl(1:H,3),'g--');
         end
         
+%         if ii <= 2
+%             ylim([0 1])
+%         end
+%         
+%         if ii == 3 || ii == 4
+%             ylim([0 2])
+%         end
+%         
+%         if ii == 5 || ii == 6
+%             ylim([0 30])
+%         end
         
+        xlim([0,10])
+               
         if (flag_oracle == 0)
             grid on
-            if ii <=3
-                legend('IRF th.','IRF NL','IRF LIN')
+            if ii == 2
+                legend('Theoretical','Nonlinear','Linear')
             end
             set(gca,'FontSize',20)
         else
@@ -145,9 +205,27 @@ for ia = 1:length(a)
             set(gca,'FontSize',20)
             
         end
+        
+        if ii == 1
+            ax = gca;
+            label_h = ylabel('a=0.1')
+        end
+        
+        if ii == 3
+            ax = gca;
+            label_h = ylabel('a=0.5')
+        end
+        
+        if ii == 5
+            ax = gca;
+            label_h = ylabel('a=0.9')
+        end
+        label_h.Position(1) = -1.5;
+        label_h.FontWeight= 'bold';
     end
 end
 
-f.Position =  [50 50 1600 800]
+
+f.Position =  [50 50 1600 1000]
 
 
