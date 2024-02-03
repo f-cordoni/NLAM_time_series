@@ -1,19 +1,34 @@
 
 generate_time_series <- function(N = 3,    T = 250 , sigma = 1,
                                  PI_1, f12, f13, f23 ,
-                                 flag_causal_structure ){
+                                 flag_causal_structure,
+                                 model="var_nonlinear",
+                                 scale_laplace = c(1, 2, 4)){
   
-
+  # model  =c("var_linear", "var_nonlinear", "var_nonGauss")
   
   
     T = T +1
-    eps = MASS::mvrnorm(T, mu = matrix(0,1,N), Sigma = sigma* diag(N))
+    if (model == "var_nonGauss"){
+      # Generating Laplace distribution with parameters (mu = 0, b = 1)
+      eps <- matrix(0, nrow = T, ncol = N)
+    
+      # Generating Laplace random variables for each scale
+      for (i in seq_along(scale_laplace)) {
+        eps[, i] <- VGAM::rlaplace(T, location = 0, scale = scale_laplace[i])
+      }
+      
+    }else{
+      eps = MASS::mvrnorm(T, mu = matrix(0,1,N), Sigma = sigma* diag(N))
+    }
+    
     Y=matrix(NA,T,N)
     u=eps*0
     Y_0=c(0.5, 0, -0.5); Y[1,]=Y_0;
     #the contemporaneous effect are computed separately from Y ( in order to make less confusion due co-founder)
     for (tt in 2:T){
-      
+     
+        
       switch(flag_causal_structure,
              chain={
                # 1->2->3
@@ -37,9 +52,7 @@ generate_time_series <- function(N = 3,    T = 250 , sigma = 1,
                # print("v-structure")
              })
       
-  
-      
-      
+ 
       past=PI_1%*%Y[tt-1,]
       Y[tt,1]=past[1]+u[tt,1] 
       Y[tt,2]=past[2]+u[tt,2];  
